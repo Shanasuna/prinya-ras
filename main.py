@@ -138,7 +138,7 @@ class MainHandler(webapp2.RequestHandler):
 
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
 		cursor = conn.cursor()
-		cursor.execute("SELECT course_id,course_code,course_name,credit_lecture,credit_lab,credit_learning,status,regiscourse_id FROM course natural join regiscourse WHERE university_id=" + str(session['university_id']))
+		cursor.execute("SELECT course_id,course_code,course_name,credit_lecture,credit_lab,credit_learning,status,regiscourse_id,department, faculty FROM course natural join regiscourse WHERE university_id=" + str(session['university_id']))
 
 		course = cursor.fetchall()
 
@@ -1261,7 +1261,7 @@ class AjaxSearch(webapp2.RequestHandler):
 
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
     		cursor = conn.cursor()
-        	sql = "SELECT course_id,course_code,course_name,credit_lecture,credit_lab,credit_learning,status,regiscourse_id FROM course natural join regiscourse WHERE university_id='" + str(session['university_id']) + "' AND (course_code LIKE '%" + key + "%' OR course_name LIKE '%" + key + "%')"
+        	sql = "SELECT course_id,course_code,course_name,credit_lecture,credit_lab,credit_learning,status,regiscourse_id, department, faculty FROM course natural join regiscourse WHERE university_id='" + str(session['university_id']) + "' AND (course_code LIKE '%" + key + "%' OR course_name LIKE '%" + key + "%')"
         	cursor.execute(sql)
 
 		course = cursor.fetchall()
