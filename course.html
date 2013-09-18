@@ -42,9 +42,13 @@
       <table width="900" border="0" cellpadding="10" cellspacing="0" id="row3">
         <tr align="center">
           <td width="200"><label>
-            <input type="text" name="keyword" id="keyword" />
+            <input type="text" name="keyword" id="keyword" placeholder="Code or Name"/>
           </label></td>
-          <td width="150"><select name="faculty" id="faculty">
+	   <td width="200"><label><input type="text" name="dept" id="dept" placeholder="Department"/></label></td>
+	  <td width="200"><label><input type="text" name="fac" id="fac" placeholder="Faculty"/></label></td>
+	   <td width="200"><label><input type="text" name="credit" id="credit" placeholder="Credit"/></label></td>
+	   <td width="200"><label><input type="text" name="status" id="status" placeholder="Status"/></label></td>
+          <!-- <td width="150"><select name="faculty" id="faculty">
                {% for row in faculty  %}
               <option value="{{row[0]}}">{{row[1]}}</option>
               {% endfor %} 
@@ -69,7 +73,7 @@
           </select></td>
           <td>
           <input type="submit" name="search" id="search" value="Search" />
-          </td>
+          </td> -->
         </tr>
       </table>
 
@@ -81,6 +85,8 @@
         <tr class="font1">
           <td width="100" align="center" bgcolor="#FFFF66">Code</td>
           <td width="360" align="center" bgcolor="#FFFF66">Name</td>
+          <td width="360" align="center" bgcolor="#FFFF66">Department</td>
+          <td width="360" align="center" bgcolor="#FFFF66">Faculty</td>
           <td width="100" align="center" bgcolor="#FFFF66">Credit</td>
           <td width="80" align="center" bgcolor="#FFFF66">Enrolled</td>
           <td width="100" align="center" bgcolor="#FFFF66">Status</td>
@@ -90,6 +96,8 @@
           <tr>
             <td align="center"><a href="/DetailCourse?course_code={{ row[1]}}">{{ row[1] }}</a></td>
             <td align="center">{{ row[2] }}</td>
+            <td align="center">{{ row[8] }}</td>
+            <td align="center">{{ row[9] }}</td>
             <td align="center">
               <script type="text/javascript">
                 var lecture,lab,learning,credit
