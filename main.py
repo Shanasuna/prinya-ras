@@ -26,8 +26,8 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 _INSTANCE_NAME="prinya-th-2013:prinya-db"
 
 decorator = OAuth2Decorator(
-	client_id='485793544323-r7jnme7rj0prdo07ml5mcndcbmkcm6du.apps.googleusercontent.com',
-	client_secret='QZBgK4wgujNsxhsY_haPJeqO',
+	client_id='380068443772.apps.googleusercontent.com',
+        client_secret='CnXNI8-u2QgJXpUs1BrBnmPP',
 	scope=['https://www.googleapis.com/auth/admin.directory.group',
 		'https://www.googleapis.com/auth/plus.me'])
 
