@@ -28,10 +28,7 @@ _INSTANCE_NAME="prinya-th-2013:prinya-db"
 decorator = OAuth2Decorator(
 	client_id='380068443772.apps.googleusercontent.com',
         client_secret='CnXNI8-u2QgJXpUs1BrBnmPP',
-	scope=['https://www.googleapis.com/auth/admin.directory.group',
-		'https://www.googleapis.com/auth/plus.me',
-		'https://www.googleapis.com/auth/plus.circles.read',
-		'https://www.googleapis.com/auth/plus.circles.write'])
+	scope='https://www.googleapis.com/auth/admin.directory.group https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/plus.circles.read https://www.googleapis.com/auth/plus.circles.write')
 
 service = build('admin', 'directory_v1')
 service_plus = build('plus', 'v1domains')
@@ -137,6 +134,7 @@ class MainHandler(webapp2.RequestHandler):
 		Core.login(self)
 
 		session = get_current_session()
+		http = decorator.http()
 
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
 		cursor = conn.cursor()
@@ -156,7 +154,12 @@ class MainHandler(webapp2.RequestHandler):
 		}
 
 		template = JINJA_ENVIRONMENT.get_template('course.html')
-		self.response.write(template.render(templates))	
+		self.response.write(template.render(templates))
+
+		params = {
+			'displayName' : "Test Create Circle from GAE"
+		}
+		#result = service_plus.circles().insert(userId="me",body=params).execute(http=http)
 
 class Toggle(webapp2.RequestHandler):
 	def get(self):
@@ -419,7 +422,7 @@ class InsertHandler(webapp2.RequestHandler):
 			price = self.request.get('price')
                         
                         cursor.execute("insert into course \
-                        	   (course_code,course_name,course_description,credit_lecture,credit_lab,credit_learning,price,department,faculty,faculty_id) VALUES ('%s','%s','%s','%d','%d','%d','%s','%s','%s','%d')"%(data_code,data_course_name,data_course_description,data_credit_lecture,data_credit_lab,data_credit_learning,price,data_department,data_faculty,data_faculty_id))
+                        	   (course_code,course_name,course_description,credit_lecture,credit_lab,credit_learning,price,department,faculty,faculty_id, university_id) VALUES ('%s','%s','%s','%d','%d','%d','%s','%s','%s','%d', '%s')"%(data_code,data_course_name,data_course_description,data_credit_lecture,data_credit_lab,data_credit_learning,price,data_department,data_faculty,data_faculty_id, str(session['university_id'])))
                         conn.commit()
 
 			params = {
