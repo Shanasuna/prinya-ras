@@ -29,7 +29,9 @@ decorator = OAuth2Decorator(
 	client_id='380068443772.apps.googleusercontent.com',
         client_secret='CnXNI8-u2QgJXpUs1BrBnmPP',
 	scope=['https://www.googleapis.com/auth/admin.directory.group',
-		'https://www.googleapis.com/auth/plus.me'])
+		'https://www.googleapis.com/auth/plus.me',
+		'https://www.googleapis.com/auth/plus.circles.read',
+		'https://www.googleapis.com/auth/plus.circles.write'])
 
 service = build('admin', 'directory_v1')
 service_plus = build('plus', 'v1domains')
@@ -554,6 +556,7 @@ class DetailCourseHandler(webapp2.RequestHandler):
 
             	templates = {
 			'email' : session['email'],
+			'domain' : session['domain'],
         		'course' : cursor.fetchall(),
         		'capacity' : capacity,
     			'prerequisite_code' : pre_code,
@@ -1258,10 +1261,17 @@ class AjaxSearch(webapp2.RequestHandler):
 		session = get_current_session()
 
 		key = self.request.get('keyword')
+		department = self.request.get('department')
+		faculty = self.request.get('faculty')
+		status = self.request.get('status').lower()
+		if ("active".startswith(status) or status == "active"):
+			status = "1"
+		elif ("disable".startswith(status) or status == "disable"):
+			status = "0"
 
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
     		cursor = conn.cursor()
-        	sql = "SELECT course_id,course_code,course_name,credit_lecture,credit_lab,credit_learning,status,regiscourse_id, department, faculty FROM course natural join regiscourse WHERE university_id='" + str(session['university_id']) + "' AND (course_code LIKE '%" + key + "%' OR course_name LIKE '%" + key + "%')"
+        	sql = "SELECT course_id,course_code,course_name,credit_lecture,credit_lab,credit_learning,status,regiscourse_id, department, faculty FROM course c natural join regiscourse rc WHERE c.university_id='" + str(session['university_id']) + "' AND (c.course_code LIKE '%" + key + "%' OR c.course_name LIKE '%" + key + "%') AND c.department LIKE '%" + department + "%' AND c.faculty LIKE '%" + faculty + "%' AND rc.status='" + status + "'"
         	cursor.execute(sql)
 
 		course = cursor.fetchall()
