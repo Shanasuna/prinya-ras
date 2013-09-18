@@ -4,8 +4,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Section Detail</title>
 <link href="css/main.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="css/jquery.js"></script>
 </head>
-
 <body>
   <div align="right" style="margin-right: 20px">{{ email }}</div>
   <br>
@@ -14,7 +14,9 @@
       <input type="submit" name="logout" value="Logout">
     </form>
   </div>
-<form action="/UpdateSection" method="post" enctype="multipart/form-data" name="secdetail">
+<form action="" method="post" enctype="multipart/form-data" name="secdetail">
+  <input type="hidden" name="section_id" value="{{section_id}}">
+  <input type="hidden" name="course_id" value="{{course_id}}">
 <table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
   <tr>
     <td><table width="500" border="0" cellspacing="0" cellpadding="0">
@@ -24,19 +26,23 @@
           <tr>
             <td width="150" align="right">Section Number :: </td>
             <td>
-              {{ row[0] }}<!-- <input type="text" name="section_number" id="section_number" value="{{ row[0] }}"> -->
+              <input type="text" name="section_number" id="section_number" value="{{ row[0] }}">
             </td>
           </tr>
           <tr>
             <td width="150" align="right">Teacher Name ::</td>
             <td>
-              {{ row[1] }}<!-- <input type="text" name="teacher" id="teacher" value="{{ row[1] }}"> -->
+              <select id="staff_id" name="staff_id">
+              {% for row2 in name %}
+                <option value="{{ row2[0] }}">{{ row2[1] }}</option>
+              {% endfor %}
+              </select>
             </td>
           </tr>
           <tr>
             <td width="150" align="right">Capacity ::</td>
             <td>
-              {{ row[2] }}<!-- <input type="text" name="capacity" id="capacity" value="{{ row[2] }}"> -->
+                <input type="text" name="capacity" id="capacity" value="{{ row[2] }}">
             </td>
           </tr>
         {% endfor %}
@@ -54,10 +60,12 @@
           </tr>
           {% for row in time %}
           <tr>
-            <td width="150" align="center" bgcolor="#FFFFCC">{{ row[1] }}</td>
-            <td align="center" bgcolor="#FFFFCC">{{ row[2] }}</td>
-            <td align="center" bgcolor="#FFFFCC">{{ row[3] }}</td>
-            <td align="center" bgcolor="#FFFFCC"><a href="/DeleteSectime?course_id={{ course_id }}&section_number={{ section_number }}&section_id={{ section_id }}&type_log=1&sectime_id={{ row[0] }}">Delete</a></td>
+            <form method="post" action="">
+              <td width="150" align="center" bgcolor="#FFFFCC">{{ row[1] }}</td>
+              <td align="center" bgcolor="#FFFFCC">{{ row[2] }}</td>
+              <td align="center" bgcolor="#FFFFCC">{{ row[3] }}</td>
+              <td align="center" bgcolor="#FFFFCC"><a href="/DeleteSectime?course_id={{ course_id }}&section_number={{ section_number }}&section_id={{ section_id }}&type_log=1&sectime_id={{ row[0] }}">Delete</a></td>
+            </form>
           </tr>
           {% endfor %}
         </table>
@@ -71,7 +79,7 @@
       <tr>
         <td align="left"><a href="/AddSectime?course_id={{ course_id }}&section_number={{ section_number }}&section_id={{ section_id }}" class="font1"><input type="button" value="Add Time"></a></td>
           <td width="150" align="center">
-            &nbsp;<!-- <input style="width:140px; height:30px;" type="submit" name="button" id="button" value="Submit" /> -->
+            <input style="width:140px; height:30px;" type="submit" name="button" id="button" value="Submit" />
           </td>
           <td width="150" align="center"><a href="/DetailSection?course_id={{ course_id }}&section_number={{ section_number }}&section_id={{ section_id }}">
             <input style="width:140px; height:30px;" type="button" value="Back" />
@@ -82,4 +90,16 @@
 </table>
 </form>
 </body>
+<script type="text/javascript">
+  $(function() {
+    {% for row in section %}
+      var selected_teacher = "{{ row[3] }}";
+      $("#staff_id option").each(function(i,v) {
+        if($(this).val() == selected_teacher) {
+          $(this).prop('selected' ,true);
+        }
+      });
+    {% endfor %}
+  });
+</script>
 </html>

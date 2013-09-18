@@ -88,5 +88,13 @@ $(function() {
         });
       });
       $("#faculty").trigger('change');
+
+      var payment_type = "{{payment_type}}";
+      if(payment_type == "1") { 
+        $("#spec").prop('checked', true);
+      } else {
+        $("#rate").prop('checked', true);
+        $("#viewFlatRate").show();
+      }
   });
 </script>

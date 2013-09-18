@@ -840,45 +840,41 @@ class DetailSectionHandler(webapp2.RequestHandler):
 
 class ModifySectionHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
-    	def get(self):
-	 #    	user = users.get_current_user()
-  #   		if not user:
-  #       		self.redirect(users.create_login_url(self.request.uri))
-		# else:
-		# 	email = user.email()
-		# 	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		# 	cursor = conn.cursor()
-		# 	cursor.execute("SELECT * FROM (SELECT student.email as stuemail, staff.email as semail FROM student LEFT JOIN staff ON student.student_id IS NULL UNION SELECT student.email as stuemail, staff.email as semail FROM student RIGHT JOIN staff ON student.student_id IS NULL) as Email WHERE stuemail='" + email +"' OR semail='" + email +"' LIMIT 1")
-		# 	row = cursor.fetchall()
-		# 	if len(row)==0:
-		# 		self.redirect('/InvalidLogin')
-		# 	else:
-		# 		if row[0][0] is None:
-		# 			user_type = "Staff"
-		# 		else:
-		# 			user_type = "Student"
-
+    	def post(self):
 		Core.login(self)
-
 		session = get_current_session()
-
-                course_id=self.request.get('course_id');
-                section_id=self.request.get('section_id');
+                course_id=self.request.get('course_id')
+		section_number = self.request.get('section_number')
+            	staff_id = self.request.get('staff_id')
+            	capacity = self.request.get('capacity')
+            	section_id = self.request.get('section_id')
+            	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+            	cursor = conn.cursor()
+            	sql = "UPDATE section SET section_number='%s' , teacher_id='%s' , capacity='%s' WHERE section_id='%s'"%(section_number,staff_id,capacity,section_id)
+            	cursor.execute(sql)        
+            	conn.commit()
+            	conn.close()
+            	self.redirect("/ModifySection?course_id="+str(course_id)+"&section_id="+str(section_id)+"&section_number="+str(section_number));
+    	@decorator.oauth_required
+	def get(self):
+		Core.login(self)
+		session = get_current_session()
+                course_id=self.request.get('course_id')
+                section_id=self.request.get('section_id')
                 section_id=int(section_id)
-                section_number=self.request.get('section_number');
+                section_number=self.request.get('section_number')
                 section_number=int(section_number)
                 conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                 cursor = conn.cursor()
-
-                sql="SELECT section_number,firstname,capacity\
+                sql="SELECT section_number,firstname,capacity,staff_id\
                     	FROM section sec JOIN staff st ON teacher_id=staff_id\
                     	WHERE section_id='%d' AND section_number='%d'"%(section_id,section_number)
                 cursor.execute(sql);
-
-
-                conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-                cursor2 = conn2.cursor()
-                sql2="SELECT sectime_id, CASE day WHEN '1' THEN 'Sunday'\
+                section_fetch = cursor.fetchall()
+                sql="SELECT staff_id, firstname FROM staff WHERE type='2' AND university_id='" + str(session['university_id']) + "'"
+                cursor.execute(sql);
+                name_fetch = cursor.fetchall()
+                sql="SELECT sectime_id, CASE day WHEN '1' THEN 'Sunday'\
                     	WHEN '2' THEN 'Monday'\
                     	WHEN '3' THEN 'Tuesday'\
                     	WHEN '4' THEN 'Wednesday'\
@@ -886,21 +882,20 @@ class ModifySectionHandler(webapp2.RequestHandler):
                     	WHEN '6' THEN 'Friday'\
                     	WHEN '7' THEN 'Saturday'\
                     	ELSE 'ERROR' END,CONCAT(CONCAT(start_time,'-'),end_time),room FROM section_time WHERE section_id='%d'"%(section_id)
-                cursor2.execute(sql2);
-
+                cursor.execute(sql);
+                time_fetch = cursor.fetchall()
+                conn.close();
                 templates = {
 			'email' : session['email'],
-                    	'section' : cursor.fetchall(),
-                    	'time' : cursor2.fetchall(),
-                    	'course_id' : course_id,
-                    	'section_id' : section_id,
-                    	'section_number' : section_number,
+			'section' : section_fetch,
+			'time' : time_fetch,
+			'course_id' : course_id,
+			'section_id' : section_id,
+			'name' : name_fetch,
+			'section_number' : section_number,
                 }
                 get_template = JINJA_ENVIRONMENT.get_template('section_modify.html')
                 self.response.write(get_template.render(templates));
-                conn.close();
-                conn2.close();
-
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class AddSectimeHandler(webapp2.RequestHandler):
@@ -1409,9 +1404,12 @@ class Credit(webapp2.RequestHandler):
     		cursor = conn.cursor()
 		cursor.execute("SELECT * FROM faculty WHERE university_id=" + str(session['university_id']))
 		faculty = cursor.fetchall()
+		cursor.execute("SELECT payment_type FROM university WHERE university_id='%s'"%(str(session['university_id'])))
+		payment_type = cursor.fetchall()
 		templates = {
 			'email' : session['email'],
-			'faculty' : faculty
+			'faculty' : faculty,
+			'payment_type' : payment_type[0][0]
 		}
 		template = JINJA_ENVIRONMENT.get_template('credit.html')
 		self.response.write(template.render(templates))
