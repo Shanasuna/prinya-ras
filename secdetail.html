@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Section Detail</title>
+<link href="css/main.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div align="right" style="margin-right: 20px">{{ email }}</div>
+  <br>
+  <div align="right" style="margin-right: 20px">
+    <form id="logout" name="logout" method="post" action="/Logout">
+      <input type="submit" name="logout" value="Logout">
+    </form>
+  </div>
+<form action="#" method="post" enctype="multipart/form-data" name="secdetail">
+<table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td><table width="500" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td><table width="500" border="0" cellspacing="0" cellpadding="5">
+        {% for row in section %}
+          <tr>
+            <td width="150" align="right">Section Number :: </td>
+            <td>{{ row[0] }}</td>
+          </tr>
+          <tr>
+            <td width="150" align="right">Teacher Name ::</td>
+            <td>{{ row[1] }}</td>
+          </tr>
+          <tr>
+            <td width="150" align="right">Capacity ::</td>
+            <td>{{ row[2] }}</td>
+          </tr>
+        {% endfor %}
+        </table></td>
+      </tr>
+      <tr>
+        <td>
+        <div style="margin-top:10px; margin-bottom:10px;" >
+        <table width="900" border="0" align="center" cellpadding="5" cellspacing="0">
+          <tr bgcolor="#FFC200" class="font1">
+            <td width="350" align="center" bgcolor="#FFFF66">Day</td>
+            <td width="350" align="center" bgcolor="#FFFF66">Time</td>
+            <td width="150" align="center" bgcolor="#FFFF66">Room</td>
+          </tr>
+          {% for row in time %}
+          <tr>
+            <td width="150" align="center" bgcolor="#FFFFCC">{{ row[1] }}</td>
+            <td align="center" bgcolor="#FFFFCC">{{ row[2] }}</td>
+            <td align="center" bgcolor="#FFFFCC">{{ row[3] }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        </div>
+        </td>
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td align="right"><table width="800" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="left">&nbsp;</td>
+          <td width="150" align="center">
+            <a href="/ModifySection?course_id={{ course_id }}&section_number={{ section_number }}&section_id={{ section_id }}">
+              <input style="width:140px; height:30px;" type="button" value="Modify" />
+            </a>
+          </td>
+          <td width="150" align="center">
+            <a href="/ModifyCourse?course_id={{ course_id }}">
+              <input style="width:140px; height:30px;" type="button" value="Back" />
+            </a>
+          </td>
+        </tr>
+      </table></td>
+  </tr>
+</table>
+</form>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% autoescape true %}
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Course</title>
+<style type="text/css">
+<!--
+-->
+</style>
+<script type="text/javascript" src="css/jquery.js"></script>
+<script type="text/javascript" src="js/main.js"></script>
+<link href="/css/main.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div align="right" style="margin-right: 20px">{{ email }}</div>
+  <br>
+  <div align="right" style="margin-right: 20px">
+    <form id="logout" name="logout" method="post" action="/Logout">
+      <input type="submit" name="logout" value="Logout">
+    </form>
+  </div>
+ <form id="form1" name="form1" method="post" action="/search">
+<table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td><table width="300" border="0" cellpadding="10" cellspacing="0" id="head">
+      <tr>
+        <td width="150" align="center" bgcolor="#FFFFCC"><a href="/">Course</a></td>
+        <td width="150" align="center" bgcolor="#FFFFCC"><a href="/Notification">Notification</a></td>
+        <td width="150" align="center" bgcolor="#FFFFCC"><a href="/Credit">Credit</a></td>
+        <td width="250" align="center" bgcolor="#FFFFCC"><a href="/ManageUser">Manage User</a></td>
+        <td width="250" align="center" bgcolor="#FFFFCC"><a href="/ManageFaculty">Manage Faculty</a></td>
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td bgcolor="#FFFFCC">
+      <table width="900" border="0" cellpadding="10" cellspacing="0" id="row3">
+        <tr align="center">
+          <td width="200"><label>
+            <input type="text" name="keyword" id="keyword" />
+          </label></td>
+          <td width="150"><select name="faculty" id="faculty">
+               {% for row in faculty  %}
+              <option value="{{row[0]}}">{{row[1]}}</option>
+              {% endfor %} 
+            </select></td>
+          <td><select name="department" id="department">
+          
+            </select></td>
+          <td width="80"><label>
+              <select name="year" id="year">
+                <option value=""></option>
+                <option value="2556">2556</option>
+                <option value="2555">2555</option>
+                <option value="2554">2554</option>
+                <option value="2553">2553</option>
+              </select>
+            </label></td>
+          <td width="50"><select name="semester" id="semester">
+            <option value=""></option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select></td>
+          <td>
+          <input type="submit" name="search" id="search" value="Search" />
+          </td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+  <tr>
+    <td align="center" bgcolor="#FFFFCC">
+      <table id="tableAjaxContent" width="900" border="0" cellpadding="6" cellspacing="0">
+        <tr class="font1">
+          <td width="100" align="center" bgcolor="#FFFF66">Code</td>
+          <td width="360" align="center" bgcolor="#FFFF66">Name</td>
+          <td width="100" align="center" bgcolor="#FFFF66">Credit</td>
+          <td width="80" align="center" bgcolor="#FFFF66">Enrolled</td>
+          <td width="100" align="center" bgcolor="#FFFF66">Status</td>
+          <td align="center" bgcolor="#FFFF66">&nbsp;</td>
+        </tr>
+        {% for row in course  %}             
+          <tr>
+            <td align="center"><a href="/DetailCourse?course_code={{ row[1]}}">{{ row[1] }}</a></td>
+            <td align="center">{{ row[2] }}</td>
+            <td align="center">
+              <script type="text/javascript">
+                var lecture,lab,learning,credit
+                lecture={{row[3]}};
+                lab={{row[4]}};
+                learning={{row[5]}};
+                credit=(lab/3)+lecture;
+                document.write(credit+"("+lecture+"-"+lab+"-"+learning+")");
+              </script>
+            </td>     
+            <td align="center">
+              {% for row2 in enroll  %}
+                <script type="text/javascript">
+                  if({{row[7]}}=={{row2[2]}})
+                    document.write({{row2[1]}}+"/"+{{row2[0]}});
+                </script>
+              {% endfor %}
+            </td>
+            <td align="center">
+              <script type="text/javascript">
+                if ({{ row[6] }}==1)
+                  document.write("Active");
+                else
+                  document.write("Inactive");
+              </script>
+            </td>
+            <td align="center">
+              {% if(row[6]==1) %}
+                <a href="/toggle?course_id={{row[0]}}"><input type='button' name='button' id='button' value='Disable' /></a>
+              {% else %}
+                <a href="/toggle?course_id={{row[0]}}"><input type='button' name='button' id='button' value='Enable' /></a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}  
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td><table width="200" border="0" cellpadding="10" cellspacing="0" id="footer">
+      <tr>
+        <td align="center"><a href="/Create">Create</a></td>
+        </tr>
+    </table></td>
+  </tr>
+</table>
+</form>
+</body>
+</html>
+
+<script type="text/javascript">
+  $(function() {
+      var faculty = [];
+      {% for row in faculty  %}
+          var department = "{{row[5]}}".split(',');
+            var array = {
+              'faculty' : "{{row[0]}}",
+              'department' : department
+            };
+            faculty.push(array);
+      {% endfor %} 
+
+      $("#faculty").change(function() {
+        var value = $(this).val();
+        
+        $.each(faculty, function(i,v) {
+          if(v.faculty ==value) {
+              $("#department").empty();
+            $.each(v.department, function(i2,v2) {
+              $("#department").append('<option value="' + v2  + '">' + v2 + '</option>');
+            }); 
+          }
+        });
+      });
+      $("#faculty").trigger('change');
+  });
+</script>
+
+{% endautoescape  %}
