@@ -1,0 +1,326 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Course Modify</title>
+<link href="css/main.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="css/jquery.js"></script>
+<script type="text/javascript" src="js/main.js"></script>
+</head>
+
+<body>
+  <div align="right" style="margin-right: 20px">{{ email }}</div>
+  <br>
+  <div align="right" style="margin-right: 20px">
+    <form id="logout" name="logout" method="post" action="/Logout">
+      <input type="submit" name="logout" value="Logout">
+    </form>
+  </div>
+<form action="/UpdateCourse" method="post" enctype="multipart/form-data">
+<table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td align="center"><div class="font2" style="margin-bottom:15px;">Modify Course</div></td>
+  </tr>
+  <tr>
+    <td><table width="900" border="0" cellspacing="0" cellpadding="5">
+    {% for row in course %}
+      <tr>
+        <td width="150" align="right">Course Code ::</td>
+        <td width="300" align="left">
+          <input name="course_id" type="text" id="course_id" value="{{ row[1] }}" readonly="readonly"/>
+        </td>
+        <td align="right">&nbsp;</td>
+        <td align="left"><input type="hidden" name="type_log" id="type_log" value="2" /></td>
+        </tr>
+      <tr>
+        <td width="150" align="right">Course Name ::</td>
+        <td width="300" align="left">
+          <input name="course_name" type="text" id="course_name" value="{{ row[2] }}" />
+        </td>
+        <td align="right">&nbsp;</td>
+        <td align="left">&nbsp;</td>
+        </tr>
+      <tr>
+        <td width="150" align="right">Prerequisite ::</td>
+        <td align="left"><select name="prerequisite" id="prerequisite">
+          <option value="{{ prerequisite_id }}">{{ prerequisite_code }}</option>
+          <option value="">------------------</option>   
+          <option value="">   - NONE - </option>
+          <option value="">------------------</option>          
+          {% for row in course2 %}
+            
+          <option value="{{ row[0] }}">{{ row[1] }}</option>
+          
+          {% endfor %}
+          
+        </select></td>
+        <td width="150" align="right">&nbsp;</td>
+        <td align="left">&nbsp;</td>
+        </tr>
+      <tr>
+        <td width="150" align="right">Faculty ::</td>
+        <td width="300" align="left"><select name="faculty" id="faculty">
+          <option value="{{ row[11] }}">{{ row[11] }}</option>
+          <option value="">--------------------------------------------</option>
+          {% for row2 in faculty  %}
+              <option value="{{row2[1]}}">{{row2[1]}}</option>
+              {% endfor %} 
+        </select></td>
+        <td width="150">&nbsp;</td>
+        <td width="120">&nbsp;</td>
+      </tr>
+      <tr>
+        <td width="150" align="right">Department ::</td>
+        <td width="300" align="left"><select name="department" id="department">
+            <option value="{{ row[10] }}">{{ row[10] }}</option>
+            <option value="">--------------------------------------------------------</option>
+            {% for row2 in department  %}
+              <option value="{{row2[0]}}">{{row2[0]}}</option>
+            {% endfor %} 
+            <!-- <option value="Infomation Technology">Infomation Technology</option>
+            <option value="Multimedia Technology">Multimedia Technology</option>
+            <option value="Business Information Technology">Business Information Technology</option>
+            <option value="Accountancy">Accountancy</option>
+            <option value="Industrial Management">Industrial Management</option>
+            <option value="International Business Management">International Business Management</option>
+            <option value="Japanese Businees Administration">Japanese Businees Administration</option>
+            <option value="Computer Engineering">Computer Engineering</option>
+            <option value="Production Engineering">Production Engineering</option>
+            <option value="Automotive Engineering">Automotive Engineering</option>
+            <option value="Electrical Engineering">Electrical Engineering</option>
+            <option value="Industrial Engineering">Industrial Engineering</option>
+            <option value="Language">Language</option> -->
+          </select></td>
+        <td width="150" align="right">&nbsp;</td>
+        <td width="120" align="left">&nbsp;</td>
+      </tr>
+      <tr>
+        <td width="150" align="right">Course Description ::</td>
+        <td colspan="3" align="left">
+          <textarea name="course_description" id="course_description" cols="45" rows="5" >{{ row[3] }}</textarea>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" id="Bold2"><table width="900" border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td width="150" align="right">Credit Lecture ::</td>
+            <td width="100"><label>
+              <input type="text" name="credit_lecture" id="credit_lecture" value="{{ row[4] }}" />
+            </label></td>
+
+
+            <script type="text/javascript">
+
+         // var type1 ={{row[7]}};
+         // var types =[" ",
+         //        "กลุ่มวิชามนุษศาสตร์",
+         //        "กลุ่มวิชาสังคมศาสตร์",
+         //        "กลุ่มวิชาคณิตศาสตร์และวิทยาศาสตร์์",
+         //        "ภาษาต่างประเทศทั่วไป",
+         //        "ภาษาต่างประเทศพิเศษ (JBJ)",
+         //        "ภาษาไทย",
+         //        "กลุ่มวิชาพลศึกษา",
+         //        "วิชาเฉพาะ วิศวกรรม",
+         //        "วิชาเฉพาะ เทคโนโลยีสารสนเทศ",
+         //        "วิชาเฉพาะ บริหารธุรกิจ",
+         //        "รายวิชาปฏิบัติการ ดูงาน",
+         //        "รายวิชาสหกิจศึกษา / ฝึกงาน / โครงงาน",
+         //        "รายวิชาเตรียมสหกิจศึกษา"];
+         // for(i=0;i<=13;i++){
+         //   if(i==type1){ 
+         //  types[i];
+         //  exit();
+         //   }
+         // }
+      </script>
+
+            <td width="50">หน่วยกิต</td>
+            <!-- <td width="150"><select name="credit_type" id="credit_type">
+              <option value="{{row[7]}}"><script>document.write(types[i]);</script></option>
+              <option value="">--------------------------</option>
+              <option value="0"></option>
+              <option value="1">กลุ่มวิชามนุษศาสตร์</option>
+              <option value="2">กลุ่มวิชาสังคมศาสตร์</option>
+              <option value="3">กลุ่มวิชาคณิตศาสตร์และวิทยาศาสตร์</option>
+              <option value="4">ภาษาต่างประเทศทั่วไป</option>
+              <option value="5">ภาษาต่างประเทศพิเศษ (JBJ)</option>
+              <option value="6">ภาษาไทย</option>
+              <option value="7">กลุ่มวิชาพลศึกษา</option>
+              <option value="8">วิชาเฉพาะ วิศวกรรม</option>
+              <option value="9">วิชาเฉพาะ เทคโนโลยีสารสนเทศ</option>
+              <option value="10">วิชาเฉพาะ บริหารธุรกิจ</option>
+              <option value="11">รายวิชาปฏิบัติการ ดูงาน</option>
+              <option value="12">รายวิชาสหกิจศึกษา / ฝึกงาน / โครงงาน</option>
+              <option value="13">รายวิชาเตรียมสหกิจศึกษา</option>
+            </select></td> -->
+          </tr>
+          <tr>
+            <td width="150" align="right">Credit Lab :: </td>
+            <td width="100"><label>
+
+
+            <script type="text/javascript">
+
+         // var type2 ={{row[8]}};
+         // var types2 =[" ",
+         //        "กลุ่มวิชามนุษศาสตร์",
+         //        "กลุ่มวิชาสังคมศาสตร์",
+         //        "กลุ่มวิชาคณิตศาสตร์และวิทยาศาสตร์์",
+         //        "ภาษาต่างประเทศทั่วไป",
+         //        "ภาษาต่างประเทศพิเศษ (JBJ)",
+         //        "ภาษาไทย",
+         //        "กลุ่มวิชาพลศึกษา",
+         //        "วิชาเฉพาะ วิศวกรรม",
+         //        "วิชาเฉพาะ เทคโนโลยีสารสนเทศ",
+         //        "วิชาเฉพาะ บริหารธุรกิจ",
+         //        "รายวิชาปฏิบัติการ ดูงาน",
+         //        "รายวิชาสหกิจศึกษา / ฝึกงาน / โครงงาน",
+         //        "รายวิชาเตรียมสหกิจศึกษา"];
+         // for(i=0;i<=13;i++){
+         //   if(i==type2){ 
+         //  types2[i];
+         //  exit();
+         //   }
+         // }
+      </script>
+              <input type="text" name="credit_lab" id="credit_lab" value="{{ row[5] }}"/>
+            </label></td>
+            <td width="50">หน่วยกิต</td>
+            <!-- <td width="150"><select name="credit_type2" id="credit_type2">
+              <option value="{{row[8]}}"><script>document.write(types2[i]);</script></option>
+              <option value="">--------------------------</option>
+              <option value="0"></option>
+              <option value="1">กลุ่มวิชามนุษศาสตร์</option>
+              <option value="2">กลุ่มวิชาสังคมศาสตร์</option>
+              <option value="3">กลุ่มวิชาคณิตศาสตร์และวิทยาศาสตร์</option>
+              <option value="4">ภาษาต่างประเทศทั่วไป</option>
+              <option value="5">ภาษาต่างประเทศพิเศษ (JBJ)</option>
+              <option value="6">ภาษาไทย</option>
+              <option value="7">กลุ่มวิชาพลศึกษา</option>
+              <option value="8">วิชาเฉพาะ วิศวกรรม</option>
+              <option value="9">วิชาเฉพาะ เทคโนโลยีสารสนเทศ</option>
+              <option value="10">วิชาเฉพาะ บริหารธุรกิจ</option>
+              <option value="11">รายวิชาปฏิบัติการ ดูงาน</option>
+              <option value="12">รายวิชาสหกิจศึกษา / ฝึกงาน / โครงงาน</option>
+              <option value="13">รายวิชาเตรียมสหกิจศึกษา</option>
+            </select></td> -->
+          </tr>
+          <tr>
+            <td width="150" align="right">Credit Learning ::</td>
+            <td width="100"><label>
+              <input type="text" name="credit_learning" id="credit_learning" value="{{ row[6] }}" />
+            </label></td>
+            <td width="50">หน่วยกิต</td>
+            <td width="150"></td>
+          </tr>
+          {% if(pay_type==1) %}
+            <tr>
+              <td width="150" align="right">Price ::</td>
+              <td width="100">
+                  <input name="price" type="text" id="price" value="{{ price }}" />Baht
+              </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+        </table></td>
+      </tr>
+      <tr>
+        <td colspan="4" id="Bold">SECTION</td>
+        </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td align="right"><table width="900" border="0" align="center" cellpadding="5" cellspacing="0">
+      <tr bgcolor="#FFC200" class="font1">
+        <td width="30" align="center" bgcolor="#FFFF66">NO</td>
+        <td align="center" bgcolor="#FFFF66">Professor</td>
+        <td width="80" align="center" bgcolor="#FFFF66">Enrolled</td>
+        <td width="80" align="center" bgcolor="#FFFF66">Capacity</td>
+        <td width="50" align="center" bgcolor="#FFFF66">Status</td>
+        <td width="50" align="center" bgcolor="#FFFF66">&nbsp;</td>
+        <td width="50" align="center" bgcolor="#FFFF66">&nbsp;</td>
+      </tr>
+      {% for row in course3 %}
+      <tr>
+        <td align="center" bgcolor="#FFFFCC">{{ row[1] }}</td>
+        <td align="center" bgcolor="#FFFFCC">{{ row[2] }}</td>
+        <td align="center" bgcolor="#FFFFCC">{{ row[3] }}</td>
+        <td align="center" bgcolor="#FFFFCC">{{ row[4] }}</td>
+        <td align="center" bgcolor="#FFFFCC">Active</td>
+        <td align="center" bgcolor="#FFFFCC"><a href="/DetailSection?course_id={{ course_id }}&section_number={{ row[1] }}&section_id={{ row[0] }}">Detail</a></td>
+        <td align="center" bgcolor="#FFFFCC"><a href="/DeleteSection?course_id={{ course_id }}&section_number={{ row[1] }}&type_log=1&section_id={{ row[0] }}">Delete</a></td>
+      </tr>
+      {% endfor %}
+    </table></td>
+  </tr>
+  <tr>
+    <td align="right">
+    <table width="450" border="0" cellpadding="10" cellspacing="0" id="footer">
+      <tr class="font2">
+        <td align="left">
+        {% for row in course %}
+          <a href="/AddSection?course_id={{ row[1] }}"><input style="width:200px; height:40;" type="button" value="Add Section" /></a>
+        </td>
+        <td width="150" align="center">
+        <input style="width:140px; height:40px;" type="submit" value="Save" onclick="return cfmModify()" />
+        </td>
+        <td width="150" align="center">
+          <a href="/DetailCourse?course_code={{ row[1] }}">
+            <input style="width:140px; height:40px;" type="button" value="Back" />
+          </a>
+        </td>
+        <td width="150" align="right">
+          <a href="/DeleteCourse?course_id={{ row[1] }}">
+            <input style="width:140px; height:40px;" type="button" value="Delete" onclick="return cfmModify()" />
+          </a>
+        </td>
+        {% endfor %}
+      </tr>
+    </table>
+    </td>
+  </tr>
+</table>
+</form>
+</body>
+</html>
+<script>
+function cfmModify(){
+	confirm('Click OK to confirm');
+	if (confirm == true){
+		alert('Success in modifications');
+		return true;
+	} else if(confirm == false){
+		return false;
+	}
+}
+
+  $(function() {
+      var faculty = [];
+      {% for row in faculty  %}
+          var department = "{{row[5]}}".split(',');
+            var array = {
+              'faculty' : "{{row[1]}}",
+              'department' : department
+            };
+            faculty.push(array);
+      {% endfor %} 
+
+      $("#faculty").change(function() {
+        var value = $(this).val();
+        
+        $.each(faculty, function(i,v) {
+          if(v.faculty ==value) {
+              $("#department").empty();
+               {% for row in course %}
+               $("#department").append('<option value="{{ row[10] }}">{{ row[10] }}</option>');
+             $("#department").append('<option value="">--------------------------------------------------------</option>');
+      {% endfor %} 
+            $.each(v.department, function(i2,v2) {
+              $("#department").append('<option value="' + v2  + '">' + v2 + '</option>');
+            }); 
+          }
+        });
+      });
+      $("#faculty").trigger('change');
+  });
+</script>

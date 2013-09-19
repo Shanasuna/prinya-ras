@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Register Adminnistrator System</title>
+    <style type="text/css">
+    <!--
+    -->
+    </style>
+    <link href="css/main.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+  <div align="right" style="margin-right: 20px">{{ email }}</div>
+  <br>
+  <div align="right" style="margin-right: 20px">
+    <form id="logout" name="logout" method="post" action="/Logout">
+      <input type="submit" name="logout" value="Logout">
+    </form>
+  </div>
+    <table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center" class="font2"><div style="margin-bottom:15px;">Register Administrator System</div></td>
+      </tr>
+      <tr>
+        <td>
+          <table width="300" border="0" cellpadding="10" cellspacing="0" id="head">
+            <tr>
+              <td width="150" align="center" bgcolor="#FFFFCC"><a href="/">Course</a></td>
+              <td width="150" align="center" bgcolor="#FFFFCC"><a href="/Notification">Notification</a></td>
+              <td width="150" align="center" bgcolor="#FFFFCC"><a href="/Credit">Credit</a></td>
+              <td width="250" align="center" bgcolor="#FFFFCC"><a href="/ManageUser">Manage User</a></td>
+              <td width="250" align="center" bgcolor="#FFFFCC"><a href="/ManageFaculty">Manage Faculty</a></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td align="left" bgcolor="#FFFFCC">
+          <h3>Faculty</h3>
+          <table border="1">
+            <tr>
+              <td>Title</td>
+              <td>Maxcredit / Semester</td>
+              <td>Fee</td>
+              <td>Department  *Separate by , (Comma)</td>
+              <td></td>
+            </tr>
+            {% for row in faculty %}
+            <form method="post" action="/ManageFaculty">
+            <tr>
+              <input type="hidden" name="faculity_id" value="{{row[0]}}"/>
+              <td><input type="text" name="title" value="{{row[1]}}"/></td>
+              <td><input type="text" name="maxcredit_per_semester" value="{{row[2]}}"/></td>
+              <td><input type="text" name="fee" value="{{row[3]}}"/></td>
+              <td><input type="text" name="department" value="{{row[4]}}"/></td>
+              <td><input type="submit" name="mode" value="edit"> <input type="submit" name="mode" value="delete"></td>
+            </tr>
+            </form>
+            {% endfor %}
+          </table>
+          <h3>Add New One</h3>
+          <form method="post" action="/ManageFaculty">
+            Faculty Name : <input type="text" name="title"><br>
+            Max Credit / Semester <input type="text" name="maxcredit_per_semester"><br>
+            Fee <input type="text" name="title"><br>
+            Department <input type="text" name="department"> *Separate by , (Comma)<br>
+            <input type="submit" name="mode" value="add">
+          </form>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

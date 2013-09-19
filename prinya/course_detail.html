@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Course Detail</title>
+<link href="css/main.css" rel="stylesheet" type="text/css" />
+    {% for row in course %}
+
+</head>
+
+<body>
+  <div align="right" style="margin-right: 20px">{{ email }}</div>
+  <br>
+  <div align="right" style="margin-right: 20px">
+    <form id="logout" name="logout" method="post" action="/Logout">
+      <input type="submit" name="logout" value="Logout">
+    </form>
+  </div>
+<table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td align="center"><div class="font2" style="margin-bottom:15px;">Course Detail</div></td>
+  </tr>
+  <tr>
+    <td><table width="900" border="0" cellspacing="0" cellpadding="5">
+
+      <tr>
+        <td width="150" align="right">Course Code ::</td>
+        <td width="300" align="left">{{ row[1] }}</td>
+        <td align="right">Total ::</td>
+        <td align="left"></td>
+        </tr>
+      <tr>
+        <td width="150" align="right">Course Name ::</td>
+        <td width="300" align="left">{{ row[2] }}</td>
+        <td align="right">Capacity ::</td>
+        <td align="left">{{ capacity }}</td>
+      </tr>
+      <tr>
+        <td width="150" align="right">Prerequisite ::</td>
+        <td align="left">{{ prerequisite_code }}</td>
+        <td width="150" align="right">&nbsp;</td>
+        <td align="left">&nbsp;</td>
+      </tr>
+      
+      <tr>
+        <td width="150" align="right">Faculty ::</td>
+        <td width="300" align="left">{{ row[11] }}</td>
+        <td width="150">&nbsp;</td>
+        <td width="120">&nbsp;</td>
+      </tr>
+      <tr>
+        <td width="150" align="right">Department ::</td>
+        <td width="300" align="left">{{ row[10] }}</td>
+        <td width="150" align="right">&nbsp;</td>
+        <td width="120" align="left">&nbsp;</td>
+      </tr>
+      <tr>
+        <td width="150" align="right">Course Description ::</td>
+        <td colspan="3" align="left">{{ row[3] }}</td>
+      </tr>
+      <tr>
+        <td colspan="4" id="Bold2"><table width="900" border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td width="150" align="right">Credit Lecture ::</td>
+            <td width="100">{{ row[4] }}<label>
+              &nbsp;
+            </label></td>
+            <td width="50">หน่วยกิต</td>
+            <td width="150">
+            </td>
+          </tr>
+          <tr>
+            <td width="150" align="right">Credit Lab :: </td>
+            <td width="100">{{ row[5] }}<label>
+              &nbsp;
+            </label></td>
+            <td width="50">หน่วยกิต</td>
+            <td width="150">
+            </td>
+          </tr>
+          <tr>
+            <td width="150" align="right">Credit Learning ::</td>
+            <td width="100">{{ row[6] }}<label>
+              &nbsp;
+            </label></td>
+            <td width="50">หน่วยกิต</td>
+            <td width="150"></td>
+          </tr>
+        {% endfor %}
+        </table></td>
+      </tr>
+      <tr>
+        <td colspan="4" id="Bold">Enrolled List</td>
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td align="right"><table width="900" border="0" cellspacing="0" cellpadding="5">
+      <tr class="font1">
+        <td width="100" align="center" bgcolor="#FFFF66">Student ID</td>
+        <td width="150" align="center" bgcolor="#FFFF66">Firstname</td>
+        <td width="150" align="center" bgcolor="#FFFF66">Lastname</td>
+        <td width="150" align="center" bgcolor="#FFFF66">Email</td>
+        <td width="100" align="center" bgcolor="#FFFF66">Section</td>
+        <td align="center" bgcolor="#FFFF66">Status</td>
+      </tr>
+      <tr>
+        <td align="center" bgcolor="#FFFFCC">&nbsp;</td>
+        <td align="center" bgcolor="#FFFFCC">&nbsp;</td>
+        <td align="center" bgcolor="#FFFFCC">&nbsp;</td>
+        <td align="center" bgcolor="#FFFFCC">&nbsp;</td>
+        <td align="center" bgcolor="#FFFFCC">&nbsp;</td>
+        <td align="center" bgcolor="#FFFFCC">&nbsp;</td>
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td align="right">
+    <table width="300" border="0" cellpadding="10" cellspacing="0" id="footer">
+      <tr>
+        <td width="150">
+        {% for row in course %}
+          <a href="/ModifyCourse?course_id={{ row[1] }}">
+          <input style="width:140px; height:40px;" type="button" value="Modify" /></a>
+        {% endfor %}
+        
+        </td>
+        <td width="150">
+         <a href="/"><input style="width:140px; height:40px;" type="button" value="Back" /></a></td>
+        <td width="100">&nbsp;</td>
+      </tr>
+    </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

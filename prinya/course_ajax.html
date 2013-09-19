@@ -1,0 +1,41 @@
+<tr class="font1">
+  <td width="100" align="center" bgcolor="#FFFF66">Code</td>
+  <td width="200" align="center" bgcolor="#FFFF66">Name</td>
+  <td width="200" align="center" bgcolor="#FFFF66">Department</td>
+  <td width="200" align="center" bgcolor="#FFFF66">Faculty</td>
+  <td width="100" align="center" bgcolor="#FFFF66">Credit</td>
+  <td width="100" align="center" bgcolor="#FFFF66">Status</td>
+  <td align="center" bgcolor="#FFFF66">&nbsp;</td>
+</tr>
+{% for row in course  %}             
+  <tr>
+    <td align="center"><a href="/DetailCourse?course_code={{ row[1]}}">{{ row[1] }}</a></td>
+    <td align="center">{{ row[2] }}</td>
+    <td align="center">{{ row[8] }}</td>
+    <td align="center">{{ row[9] }}</td>
+    <td align="center" id="credit{{loop.index}}">
+      <script type="text/javascript">
+        var lecture,lab,learning,credit
+        lecture={{row[3]}};
+        lab={{row[4]}};
+        learning={{row[5]}};
+        credit=(lab/3)+lecture;
+        document.getElementById("credit"+{{loop.index}}).innerHTML = credit+"("+lecture+"-"+lab+"-"+learning+")";
+      </script>
+    </td>
+    <td align="center">
+      {% if(row[6]==1) %}
+        Active
+      {% else %}
+        Inactive
+      {% endif %}
+    </td>
+    <td align="center">
+      {% if(row[6]==1) %}
+        <a href="/toggle?course_id={{row[0]}}"><input type='button' name='button' id='button' value='Disable' /></a>
+      {% else %}
+        <a href="/toggle?course_id={{row[0]}}"><input type='button' name='button' id='button' value='Enable' /></a>
+      {% endif %}
+    </td>
+  </tr>
+{% endfor %}

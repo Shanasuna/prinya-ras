@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Add Section</title>
+<link href="css/main.css" rel="stylesheet" type="text/css" />
+
+        <link rel="stylesheet"  type="text/css" href="css/bootstrap.css" />
+        <link rel="stylesheet"  type="text/css" href="css/bootstrap-timepicker.min.css" />
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script type="text/javascript" src="css/bootstrap-2.2.2.min.js"></script>
+        <script type="text/javascript" src="css/bootstrap-timepicker.min.js"></script>
+        
+        <script type="text/javascript">
+          $(function() {
+            $('#timepicker1').timepicker({
+              showMeridian :false
+            });
+            $('#timepicker2').timepicker({
+              showMeridian :false
+            });
+          });
+        </script>
+</head>
+
+<body>
+  <div align="right" style="margin-right: 20px">{{ email }}</div>
+  <br>
+  <div align="right" style="margin-right: 20px">
+    <form id="logout" name="logout" method="post" action="/Logout">
+      <input type="submit" name="logout" value="Logout">
+    </form>
+  </div>
+<table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td align="center"><div class="font2" style=" margin-top:10px; margin-bottom:15px;">Add Time</div></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <form id="form1" name="form1" method="post" action="/InsSectime">
+        <table width="500" border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td width="150" align="right" bgcolor="#FFFF66">Day ::</td>
+            <td bgcolor="#FFFFCC"><label>
+              <select name="day" id="day">
+                <option value="1">Sunday</option>
+                <option value="2">Monday</option>
+                <option value="3">Tuesday</option>
+                <option value="4">Wednesday</option>
+                <option value="5">Thursday</option>
+                <option value="6">Friday</option>
+                <option value="7">Saturday</option>
+              </select>
+            </label></td>
+          </tr>
+          <tr>
+            <td width="150" align="right" bgcolor="#FFFF66">Start_time ::</td>
+            <td bgcolor="#FFFFCC">
+            <div class="input-append bootstrap-timepicker">
+            <input type="hidden" id="course_id" name="course_id" value="{{ course_id }}"/>
+            <input type="hidden" id="section_id" name="section_id" value="{{ section_id }}"/>
+            <input type="hidden" id="section_number" name="section_number" value="{{ section_number }}"/>
+            <input name="start_time" type="text" class="input-small" id="timepicker1">
+            <span class="add-on"><i class="icon-time"></i></span>
+	        </div>
+ 
+
+            </td>
+          </tr>
+          <tr>
+            <td width="150" align="right" bgcolor="#FFFF66">End_time ::</td>
+            <td bgcolor="#FFFFCC">
+            <div class="input-append bootstrap-timepicker">
+              <input name="end_time" type="text" class="input-small" id="timepicker2" />
+              <span class="add-on"><i class="icon-time"></i></span>
+	        </div>
+            </td>
+          </tr>
+          <tr>
+            <td width="150" align="right" bgcolor="#FFFF66">Room ::</td>
+            <td><input name="roomid" type="text" />
+            <!-- <td bgcolor="#FFFFCC">
+            <SELECT name="roomid" >
+			<OPTION VALUE="A101">A101 : ความจุ : 25   </OPTION>
+			<OPTION VALUE="A111">A111 : ความจุ : 25  </OPTION>
+			<OPTION VALUE="A302">A302 : ความจุ :   </OPTION>
+			<OPTION VALUE="A303">A303 : ความจุ :    </OPTION>
+			<OPTION VALUE="A304">A304 : ความจุ : 75  </OPTION>
+			<OPTION VALUE="A308">A308 : ความจุ :    </OPTION>
+			<OPTION VALUE="A309">A309 : ความจุ : 30  </OPTION>
+			<OPTION VALUE="A310">A310 : ความจุ : 30   </OPTION>
+			<OPTION VALUE="A313">A313 : ความจุ : 75   </OPTION>
+			<OPTION VALUE="A314">A314 : ความจุ : 75   </OPTION>
+			<OPTION VALUE="A409">A409 : ความจุ :    </OPTION>
+			<OPTION VALUE="A410">A410 : ความจุ : 40   </OPTION>
+			<OPTION VALUE="A411">A411 : ความจุ : 40   </OPTION>
+			<OPTION VALUE="A412">A412 : ความจุ : 40   </OPTION>
+			<OPTION VALUE="A413">A413 : ความจุ : 40   </OPTION>
+			<OPTION VALUE="A414">A414 : ความจุ : 40  </OPTION>
+			<OPTION VALUE="A415">A415 : ความจุ : 40   </OPTION>
+			<OPTION VALUE="A416">A416 : ความจุ : 40   </OPTION>
+			<OPTION VALUE="A601">A601 : ความจุ : 200   </OPTION>
+			<OPTION VALUE="A602">A602 : ความจุ :    </OPTION>
+			<OPTION VALUE="A603">A603 : ความจุ : 90   </OPTION>
+			<OPTION VALUE="A604">A604 : ความจุ :  </OPTION>
+			<OPTION VALUE="B201">B201 : ความจุ : 120   </OPTION>
+			<OPTION VALUE="B202">B202 : ความจุ : 120   </OPTION> 
+			<OPTION VALUE="B203">B203 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="B301">B301 : ความจุ : 100   </OPTION>
+			<OPTION VALUE="B303">B303 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="B304">B304 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="B305">B305 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="B401">B401 : ความจุ : 50   </OPTION>
+			<OPTION VALUE="B402">B402 : ความจุ : 50   </OPTION>
+			<OPTION VALUE="B404">B404 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="B501">B501 : ความจุ : 50   </OPTION>
+			<OPTION VALUE="B502">B502 : ความจุ : 60  </OPTION>
+			<OPTION VALUE="B503">B503 : ความจุ : 60   </OPTION> 
+			<OPTION VALUE="B504">B504 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="B601">B601 : ความจุ : 60   </OPTION> 
+			<OPTION VALUE="B602">B602 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="B603">B603 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="B604">B604 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="B605">B605 : ความจุ : 60  </OPTION>
+			<OPTION VALUE="B701">B701 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="B702">B702 : ความจุ : 60  </OPTION>
+			<OPTION VALUE="B703">B703 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="B704">B704 : ความจุ : 60  </OPTION>
+			<OPTION VALUE="B705">B705 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="C109">C109 : ความจุ : 35   </OPTION>
+			<OPTION VALUE="C110">C110 : ความจุ : 35   </OPTION>
+			<OPTION VALUE="C111">C111 : ความจุ : 35   </OPTION>
+			<OPTION VALUE="C119">C119 : ความจุ : 0   </OPTION>
+			<OPTION VALUE="C120">C120 : ความจุ : 35   </OPTION>
+			<OPTION VALUE="C201">C201 : ความจุ : 35  </OPTION>
+			<OPTION VALUE="C202">C202 : ความจุ : 35   </OPTION>
+			<OPTION VALUE="C203">C203 : ความจุ : 40   </OPTION>
+			<OPTION VALUE="C204">C204 : ความจุ : 35   </OPTION>
+			<OPTION VALUE="C205">C205 : ความจุ : 35   </OPTION>
+			<OPTION VALUE="C206">C206 : ความจุ : 35  </OPTION>
+			<OPTION VALUE="C207">C207 : ความจุ : 35   </OPTION>
+			<OPTION VALUE="C208">C208 : ความจุ : 35    </OPTION>
+			<OPTION VALUE="C301">C301 : ความจุ : 35   </OPTION>
+			<OPTION VALUE="C302">C302 : ความจุ : 35   </OPTION>
+			<OPTION VALUE="C303">C303 : ความจุ :    </OPTION>
+			<OPTION VALUE="C304">C304 : ความจุ : 0   </OPTION>
+			<OPTION VALUE="C305">C305 : ความจุ : 50   </OPTION>
+			<OPTION VALUE="C306">C306 : ความจุ : 50  </OPTION>
+			<OPTION VALUE="C307">C307 : ความจุ : 50   </OPTION>
+			<OPTION VALUE="C401">C401 : ความจุ : 200   </OPTION>
+			<OPTION VALUE="C402">C402 : ความจุ : 70   </OPTION>
+			<OPTION VALUE="C403">C403 : ความจุ : 70   </OPTION>
+			<OPTION VALUE="C404">C404 : ความจุ : 70   </OPTION>
+			<OPTION VALUE="C405">C405 : ความจุ : 70  </OPTION>
+			<OPTION VALUE="C406">C406 : ความจุ : 70   </OPTION>
+			<OPTION VALUE="C407">C407 : ความจุ : 70   </OPTION>
+			<OPTION VALUE="C501">C501 : ความจุ : 200  </OPTION>
+			<OPTION VALUE="C502">C502 : ความจุ : 60   </OPTION>
+			<OPTION VALUE="C503">C503 : ความจุ : 80   </OPTION>
+			<OPTION VALUE="C504">C504 : ความจุ : 80  </OPTION>
+			<OPTION VALUE="C505">C505 : ความจุ : 80  </OPTION>
+			<OPTION VALUE="C506">C506 : ความจุ : 80  </OPTION>
+			<OPTION VALUE="C507">C507 : ความจุ : 80   </OPTION>
+			<OPTION VALUE="C601">C601 : ความจุ : 120 </OPTION>
+			<OPTION VALUE="602">C602 : ความจุ : 0   </OPTION>
+            </SELECT> -->
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" align="center"><label>
+              <input type="submit" name="submit" id="submit" value="Add Section" onclick="return confirm('Click submit to confirm')" />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <a href="/ModifySection?course_id={{ course_id }}&section_number={{ section_number }}&section_id={{ section_id }}"><input type="button" name="reset" id="reset" value="Back" /></a>
+            </label></td>
+          </tr>
+        </table>
+    </form></td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,212 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Create Course</title>
+<link href="css/main.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="css/jquery.js"></script>
+</head>
+<body>
+  <div align="right" style="margin-right: 20px">{{ email }}</div>
+  <br>
+  <div align="right" style="margin-right: 20px">
+    <form id="logout" name="logout" method="post" action="/Logout">
+      <input type="submit" name="logout" value="Logout">
+    </form>
+  </div>
+<form action="/Insert" method="post" enctype="multipart/form-data" onsubmit="return validate()" id="form1">
+<table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td align="center"><div class="font2" style="margin-bottom:15px;">Create Course</div></td>
+  </tr>
+  <tr>
+    <td><table width="900" border="0" cellspacing="0" cellpadding="7" id="table2">
+      <tr>
+        <td width="150" align="right">Course Code ::</td>
+        <td colspan="2"><input name="course_code" type="text" id="course_code" maxlength="7"/>
+          <input type="button" name="chkStr" id="chkStr" value="Check" onclick="return chkEng()" /></td>
+        </tr>
+      <tr>
+        <td width="150" align="right">Course Name ::</td>
+        <td colspan="2"><input type="text" name="course_name" id="course_name" /></td>
+        </tr>
+      <tr>
+        <td width="150" align="right" valign="top">Prerequisite ::</td>
+        <td>        
+        <select name="prerequisite" id="prerequisite">
+        <option value="0">------------</option>
+ 		{% for row in course %}
+        <option value="{{ row[0] }}">{{ row[1] }}</option>
+        {% endfor %}
+        </select>
+            
+
+  </td>
+        <td width="550" valign="top">
+
+          </td>
+        </tr>
+      <tr>
+        <td width="150" align="right">Faculty ::</td>
+        <td colspan="2"><select name="faculty" id="faculty">
+           {% for row in faculty  %}
+              <option value="{{row[0]}}">{{row[1]}}</option>
+              {% endfor %} 
+        </select></td>
+        </tr>
+      <tr>
+        <td width="150" align="right">Dapartment</td>
+        <td colspan="2"><select name="department" id="department">
+        </select></td>
+        </tr>
+      <tr>
+        <td width="150" align="right">Course Description ::</td>
+        <td colspan="2"><textarea name="course_description" id="course_description" cols="45" rows="5"></textarea></td>
+        </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td align="right">
+    <table width="900" border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td width="150" align="right">Credit Lecture ::</td>
+            <td width="100"><label>
+              <input name="credit_lecture" type="text" id="credit_lecture" maxlength="1" />
+            </label>
+            </td>
+	    <td width="50">หน่วยกิต</td>
+            </tr>
+          <tr>
+            <td width="150" align="right">Credit Lab :: </td>
+            <td width="100"><label>
+              <input name="credit_lab" type="text" id="credit_lab" maxlength="1" />
+            </label></td>
+            <td width="50">หน่วยกิต</td>
+            </tr>
+          <tr>
+            <td width="150" align="right">Credit Learning ::</td>
+            <td width="100"><label>
+              <input name="credit_learning" type="text" id="credit_learning" maxlength="1" />
+            </label></td>
+            <td width="50">หน่วยกิต</td>
+            <td width="150"></td>
+            </tr>
+            {% if(pay_type==1) %}
+            <tr>
+              <td width="150" align="right">Price ::</td>
+              <td width="100">
+                  <input name="price" type="text" id="price" />Baht
+              </td>
+            </tr>
+            {% endif %}
+          </table>
+    </td>
+  </tr>
+  <tr>
+    <td align="right">
+    <table width="450" border="0" cellpadding="10" cellspacing="0" id="footer">
+      <tr class="font2">
+        <td width="100" align="center">
+        <input style="width:140px; height:30px;" type="submit" name="submit" id="submit" value="Submit" onclick="return confirm('Click OK to confirm');" />
+        </td>
+        <td width="100" align="center">
+        <input style="width:140px; height:30px;" type="reset" name="Reset" id="Reset" value="Reset" />
+        </td>
+        <td width="100" align="center">
+        <input style="width:140px; height:30px;" type="button" name="back" id="back" value="Back" onClick="window.history.back()" />
+        </td>
+      </tr>
+    </table>
+    </td>
+  </tr>
+</table>
+</form>
+</body>
+</html>
+
+<script type="text/javascript">
+  function validate(){
+
+    if(document.getElementById('course_code').value==""){
+      document.getElementById('course_code').focus();
+      return false;
+    }
+    else if(document.getElementById('course_name').value==""){
+      alert("Please insert Course Name");
+      document.getElementById('course_name').focus();
+      return false;
+    }
+    else if(document.getElementById('course_description').value==""){
+      alert("Please insert Course Description");
+      document.getElementById('course_description').focus();
+      return false;
+    }
+    else if(document.getElementById('credit_lecture').value==""){
+      alert("Please insert Credit Lecture");
+      document.getElementById('credit_lecture').focus();
+      return false;
+    }
+    else if(isNaN(document.getElementById('credit_lecture').value)){
+      alert('Please insert Number Only');
+      document.getElementById('credit_lecture').select();
+      return false; 
+    }
+    else if(document.getElementById('credit_lab').value==""){
+      alert("Please insert Credit Lab");
+      document.getElementById('credit_lab').focus();
+      return false;
+    }
+    else if(isNaN(document.getElementById('credit_lab').value)){
+      alert('Please insert Number Only');
+      document.getElementById('credit_lab').select();
+      return false; 
+    }
+    else if(document.getElementById('credit_learning').value==""){
+      alert("Please insert Credit Lerning");
+      document.getElementById('credit_learning').focus();
+      return false;
+    }
+    else if(isNaN(document.getElementById('credit_learning').value)){
+      alert('Please insert Credit Number Only');
+      document.getElementById('credit_learning').select();
+      return false; 
+    }
+    else if(document.getElementById('faculty').value=='0'){
+      alert('Please select Faculty');
+      document.getElementById('faculty').select();
+      return false; 
+    }
+  }
+function chkEng()
+{ 
+   if(!$("#course_code").val().match(/^[A-Za-z]{3}-[0-9]{3}$/)) {
+        alert("Please insert  correct Format.  \nExample  ::  JPN-101 ");
+        return false;
+      }
+}
+$(function() {
+      var faculty = [];
+      {% for row in faculty  %}
+          var department = "{{row[5]}}".split(',');
+            var array = {
+              'faculty' : "{{row[0]}}",
+              'department' : department
+            };
+            faculty.push(array);
+      {% endfor %} 
+
+      $("#faculty").change(function() {
+        var value = $(this).val();
+        
+        $.each(faculty, function(i,v) {
+          if(v.faculty ==value) {
+              $("#department").empty();
+            $.each(v.department, function(i2,v2) {
+              $("#department").append('<option value="' + v.faculty  + '">' + v2 + '</option>');
+            }); 
+          }
+        });
+      });
+      $("#faculty").trigger('change');
+  });
+</script>

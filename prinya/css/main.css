@@ -1,0 +1,90 @@
+@charset "utf-8";
+body,td,th {
+	font-family: tahoma;
+	font-size: 13px;
+	color: #333;
+	margin-top: 10px;
+	margin-right: 0px;
+	margin-bottom: 10px;
+	margin-left: 0px;
+}
+#head {
+	font-family: tahoma;
+	font-size: 36px;
+	font-weight: bold;
+	color: #333;
+	border-top-width: 0px;
+	border-right-width: 0px;
+	border-bottom-width: 0px;
+	border-left-width: 0px;
+}
+#content {
+	border-top-width: 1px;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	border-left-width: 1px;
+	border-top-color: #CCC;
+	border-right-color: #CCC;
+	border-bottom-color: #CCC;
+	border-left-color: #CCC;
+}
+
+#keyword {
+	width: 160px;
+}
+#form1 #row3 tr td label #department {
+	width: 40px;
+}
+
+#form1 #row3 {
+	padding: 0px;
+	margin: 5px;
+}
+#footer {
+	font-family: tahoma;
+	font-size: 24px;
+	font-weight: bold;
+	color: #333;
+}
+#Bold {
+	font-size: 24px;
+	font-weight: bolder;
+}
+.font1 {
+	font-size: 16px;
+	font-weight: bolder;
+}
+.width280 {
+	width: 280px;
+}
+#code {
+	width: 280px;
+}
+#course_name {
+	width: 280px;
+}
+#group {
+	width: 280px;
+}
+#faculity {
+	width: 2จ0;
+}
+#credit {
+	width: 100px;
+}
+#total_capacity {
+	width: 100px;
+}
+#total_enroll {
+	width: 100px;
+}
+#course_description {
+	width: 500px;
+}
+#pererqusite {
+	width: 280px;
+}
+.font2 {
+	font-size: 24px;
+	font-weight: bold;
+}

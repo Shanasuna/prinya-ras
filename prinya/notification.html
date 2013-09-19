@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Register Adminnistrator System</title>
+<style type="text/css">
+<!--
+-->
+</style>
+<link href="css/main.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+for (var i=0;i<10;i++)
+{ 
+  if(getElementById('test')==""){
+document.write(carsi);
+  }
+}
+</script>
+</head>
+<body>
+  <div align="right" style="margin-right: 20px">{{ email }}</div>
+  <br>
+  <div align="right" style="margin-right: 20px">
+    <form id="logout" name="logout" method="post" action="/Logout">
+      <input type="submit" name="logout" value="Logout">
+    </form>
+  </div>
+ <form id="form1" name="form1" method="get" action="/toggle">
+<table width="900" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td align="center" class="font2"><div style="margin-bottom:15px;">Register Administrator System</div></td>
+  </tr>
+  <tr>
+    <td><table width="300" border="0" cellpadding="10" cellspacing="0" id="head">
+      <tr>
+        <td width="150" align="center" bgcolor="#FFFFCC"><a href="/">Course</a></td>
+        <td width="150" align="center" bgcolor="#FFFFCC"><a href="/Notification">Notification</a></td>
+        <td width="150" align="center" bgcolor="#FFFFCC"><a href="/Credit">Credit</a></td>
+        <td width="250" align="center" bgcolor="#FFFFCC"><a href="/ManageUser">Manage User</a></td>
+        <td width="250" align="center" bgcolor="#FFFFCC"><a href="/ManageFaculty">Manage Faculty</a></td>
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td align="center" bgcolor="#FFFFCC">
+    <div style="margin-top:10px; margin-bottom:10px;">
+    {% for row in log %}
+    {% if(row[0]%2==0) %}
+    <table width="880" border="0" cellspacing="0" cellpadding="7">
+      <tr>
+        <td colspan="2" align="left" bgcolor="#FF9966"><span id='test'></span>Notification :: {{ row[0] }}</td>
+      </tr>
+      <tr>
+        <td colspan="2" align="left" bgcolor="#FF9966">
+        <script>
+          var type="{{row[4]}}";
+          var course="{{row[1]}}";
+          if(type==1){
+            document.write("Course " + course + " has been created by :: ");
+          }else if(type==2){
+            document.write("Section in course " + course + " has been created by :: ");
+          }else if(type==3){
+            document.write("Section time in course " + course + " has been created by :: ")
+          }else if(type==4){
+            document.write("Course " + course + " has been modified by :: ")
+          }else if(type==5){
+            document.write("Course " + course + " has been deleted by :: ")
+          }else if(type==6){
+            document.write("Section in course " + course + " has been deleted by :: ")
+          }else if(type==7){
+            document.write("Section time in course " + course + " has been deleted By :: ")
+          }
+        </script>
+        {{ row[6]}} 
+        </td>
+        </tr>
+      <tr>
+        <td align="left" bgcolor="#FF9966">
+        Date :: {{ row [2] }}   &nbsp;&nbsp;&nbsp;Time ::{{row[3]}}
+        </td>
+        <td width="300" align="left" bgcolor="#FF9966"><a href="{{row[7]}}">Email :: {{row[7]}}</a></td>
+      </tr>
+    </table>
+      {% else %}
+          <table width="880" border="0" cellspacing="0" cellpadding="7">
+      <tr>
+        <td colspan="2" align="left" bgcolor="#FFFF66">Notification :: {{ row[0] }}</td>
+      </tr>
+      <tr>
+        <td colspan="2" align="left" bgcolor="#FFFF66">
+        <script>
+      		var type="{{row[4]}}";
+          var course="{{row[1]}}";
+      		if(type==1){
+      			document.write("Course " + course + " has been created by :: ");
+      		}else if(type==2){
+      			document.write("Section in course " + course + " has been created by :: ");
+      		}else if(type==3){
+      			document.write("Section time in course " + course + " has been created by :: ")
+      		}else if(type==4){
+            document.write("Course " + course + " has been modified by :: ")
+          }else if(type==5){
+            document.write("Course " + course + " has been deleted by :: ")
+          }else if(type==6){
+            document.write("Section in course " + course + " has been deleted by :: ")
+          }else if(type==7){
+            document.write("Section time in course " + course + " has been deleted By :: ")
+          }
+      	</script>
+        {{ row[6]}} 
+        </td>
+        </tr>
+      <tr>
+        <td align="left" bgcolor="#FFFF66">
+        Date :: {{ row [2] }}   &nbsp;&nbsp;&nbsp;Time ::{{row[3]}}
+        </td>
+        <td width="300" align="left" bgcolor="#FFFF66"><a href="{{row[7]}}">Email :: {{row[7]}}</a></td>
+      </tr>
+    </table>
+      {% endif %}  
+      {% endfor %}
+    </div>
+    </td>
+  </tr>
+
+</table>
+    </form>
+</body>
+</html>
