@@ -26,9 +26,9 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 _INSTANCE_NAME="prinya-th-2013:prinya-db"
 
 decorator = OAuth2Decorator(
-	client_id='380068443772.apps.googleusercontent.com',
-        client_secret='CnXNI8-u2QgJXpUs1BrBnmPP',
-	scope='https://www.googleapis.com/auth/admin.directory.group https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/plus.circles.read https://www.googleapis.com/auth/plus.circles.write')
+	client_id='485793544323-r7jnme7rj0prdo07ml5mcndcbmkcm6du.apps.googleusercontent.com',
+        client_secret='QZBgK4wgujNsxhsY_haPJeqO',
+	scope='https://www.googleapis.com/auth/admin.directory.group https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/plus.circles.read https://www.googleapis.com/auth/plus.circles.write')
 
 service = build('admin', 'directory_v1')
 service_plus = build('plus', 'v1domains')
@@ -157,11 +157,6 @@ class MainHandler(webapp2.RequestHandler):
 
 		template = JINJA_ENVIRONMENT.get_template('course.html')
 		self.response.write(template.render(templates))
-
-		params = {
-			'displayName' : "Test Create Circle from GAE"
-		}
-		#result = service_plus.circles().insert(userId="me",body=params).execute(http=http)
 
 class Toggle(webapp2.RequestHandler):
 	def get(self):
@@ -422,9 +417,14 @@ class InsertHandler(webapp2.RequestHandler):
                             		data_faculty =row[1]
 
 			price = self.request.get('price')
+
+			params = {
+				'displayName' : "prinya-course-" + data_code
+			}
+			result = service_plus.circles().insert(userId="me",body=params).execute(http=http)
                         
                         cursor.execute("insert into course \
-                        	   (course_code,course_name,course_description,credit_lecture,credit_lab,credit_learning,price,department,faculty,faculty_id, university_id) VALUES ('%s','%s','%s','%d','%d','%d','%s','%s','%s','%d', '%s')"%(data_code,data_course_name,data_course_description,data_credit_lecture,data_credit_lab,data_credit_learning,price,data_department,data_faculty,data_faculty_id, str(session['university_id'])))
+                        	   (course_code,course_name,course_description,credit_lecture,credit_lab,credit_learning,price,department,faculty,faculty_id, university_id, circle_id) VALUES ('%s','%s','%s','%d','%d','%d','%s','%s','%s','%d', '%s', '%s')"%(data_code,data_course_name,data_course_description,data_credit_lecture,data_credit_lab,data_credit_learning,price,data_department,data_faculty,data_faculty_id, str(session['university_id']), str(result['id'])))
                         conn.commit()
 
 			params = {
@@ -1043,6 +1043,10 @@ class DeleteCourseHandler(webapp2.RequestHandler):
 
     	        conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
     	        cursor = conn.cursor()
+		sql="SELECT circle_id FROM course WHERE course_code='%s' AND university_id='%s'"%(course_id, str(session['university_id']))
+		cursor.execute(sql)
+		allrow = cursor.fetchall()
+		circle_id = allrow[0][0]
     	        sql="DELETE FROM course WHERE course_code='%s' AND university_id='%s'"%(course_id, str(session['university_id']))
     	        cursor.execute(sql);
     	        conn.commit();
@@ -1062,6 +1066,7 @@ class DeleteCourseHandler(webapp2.RequestHandler):
 
     		email = "prinya-course-" + course_id + session['domain']
     		result = service.groups().delete(groupKey=email).execute(http=http)
+		result = service_plus.circles().remove(circleId=circle_id).execute(http=http)
 
     	        self.redirect("/");        
 
