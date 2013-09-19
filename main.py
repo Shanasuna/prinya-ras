@@ -49,6 +49,9 @@ class Core():
 	def __init__(self):
 		self.response.write("Create CoreData")
 
+  	# This function is to initialize important variables
+        # such as FIRSTNAME, LASTNAME, and
+        # UNIVERSITY_ID of the user logs on
 	@staticmethod
 	def login(self):
 		user = users.get_current_user()
@@ -106,6 +109,10 @@ class Core():
 
 class Logout(webapp2.RequestHandler):
 	@decorator.oauth_required
+	
+
+	# This function is exectued when the user requests with method POST
+        # Terminate session before logging out
 	def post(self):
 		Core.IS_LOGIN = 0
 		Core.UNIVERSITY_ID = -1
@@ -116,6 +123,9 @@ class Logout(webapp2.RequestHandler):
 		Core.LASTNAME = ""
 		get_current_session().terminate()
 		self.redirect(users.create_logout_url(self.request.uri))
+
+	# This function is executed when the user requests with method GET
+        # Terminate session before logging out
 	def get(self):
 		Core.IS_LOGIN = 0
 		Core.UNIVERSITY_ID = -1
@@ -129,6 +139,8 @@ class Logout(webapp2.RequestHandler):
 
 class MainHandler(webapp2.RequestHandler):
 
+	# This function is to retrieve course information from the 
+        # database and display course information in the table
 	@decorator.oauth_required
 	def get(self):
 
@@ -155,34 +167,6 @@ class MainHandler(webapp2.RequestHandler):
 
 		template = JINJA_ENVIRONMENT.get_template('course.html')
 		self.response.write(template.render(templates))	
-
-class Toggle(webapp2.RequestHandler):
-	def get(self):
-
-		value=self.request.get('course_id');
-		value=int(value)	
-
-		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-    		cursor = conn.cursor()
-    		sql1="SELECT status FROM regiscourse WHERE course_id= '%d'"%value
-    		cursor.execute(sql1);
-    		result=cursor.fetchall()
-
-    		for row in result:
-			if row[0]==1:
-				sql2="UPDATE regiscourse set status=0 where course_id='%d'"%value
-
-				cursor.execute(sql2);
-				
-
-			else:
-				sql3="UPDATE regiscourse set status=1 where course_id='%d'"%value
-				cursor.execute(sql3);
-
-				
-		conn.commit()
-		conn.close()
-		self.redirect("/")
 
 
 class search(webapp2.RequestHandler):
@@ -1486,7 +1470,6 @@ class ManageFaculty(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
 	('/', MainHandler),
-	('/toggle',Toggle),
 	('/search',search),
 	('/Create', CreateHandler),
 	('/Insert', InsertHandler),
