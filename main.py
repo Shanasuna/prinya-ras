@@ -449,9 +449,6 @@ class InsertHandler(webapp2.RequestHandler):
                                         (course_id,type,prerequisite_id) values((select course_id from course where course_code = '%s'),1,'%s')"%(data_code,data_prerequisite))        
                                 conn3.commit()
 
-                        # self.response.write(total)
-                        # self.response.write(price1)
-                        # self.response.write(price2)
                         conn.close()
                         conn2.close()
                         conn3.close()
@@ -756,6 +753,7 @@ class InsSectionHandler(webapp2.RequestHandler):
 		Core.login(self)
 
 		session = get_current_session()
+		http = decorator.http()
 
         	course_id=self.request.get('course_id');
                 section_number=self.request.get('section_number');
@@ -772,6 +770,13 @@ class InsSectionHandler(webapp2.RequestHandler):
                 cursor.execute(sql);
                 conn.commit();
                 conn.close();
+
+		params = {
+			'email': "prinya-course-" + course_id + "-" + str(section_number) + session['domain'],
+			'name' : course_id + "-" + str(section_number)
+		}
+	
+		result = service.groups().insert(body=params).execute(http=http)
 
                 utc = pytz.utc
                 date_object = datetime.today()
@@ -1031,93 +1036,6 @@ class DeleteCourseHandler(webapp2.RequestHandler):
         	section_id=""
                 prerequisite=""
                 sectime=""
-         #        check=""
-        	
-        	# conn10 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-         #        cursor10 = conn10.cursor()
-         #        sql10="SELECT p_id FROM prerequisite_course WHERE prerequisite_id IN \
-         #        	(SELECT course_id FROM course WHERE course_code='%s')"%(course_id)
-         #        cursor10.execute(sql10);
-         #        for row in cursor10.fetchall():
-         #            	check=row[0]
-         #        conn10.commit();
-         #        conn10.close();
-
-         #        if check!="":
-         #        	self.redirect("/ErrorDel?course_id="+course_id);
-         #        else:
-        	#         conn5 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#         cursor5 = conn5.cursor()
-        	#         sql5="SELECT section_id,sectime_id FROM section_time WHERE section_id IN\
-        	#             (SELECT section_id FROM section WHERE regiscourse_id = \
-        	#             (SELECT regiscourse_id FROM regiscourse WHERE course_id=\
-        	#             (SELECT course_id FROM course WHERE course_code='%s')))"%(course_id)
-        	#         cursor5.execute(sql5);
-        	#         for row in cursor5.fetchall():
-        	#             	sectime=row[0]
-        	#         conn5.commit();
-        	#         conn5.close();
-
-        	#         conn9 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#         cursor9 = conn9.cursor()
-        	#         sql9="SELECT section_id FROM section WHERE section_id IN\
-        	#             (SELECT section_id FROM section WHERE regiscourse_id = \
-        	#             (SELECT regiscourse_id FROM regiscourse WHERE course_id=\
-        	#             (SELECT course_id FROM course WHERE course_code='%s')))"%(course_id)
-        	#         cursor9.execute(sql9);
-        	#         for row in cursor9.fetchall():
-        	#             	section_id=row[0]
-        	#         conn9.commit();
-        	#         conn9.close();
-
-        	#         if section_id!="":
-        	#             	if sectime!="":
-        	#                 	conn4 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#                 	cursor4 = conn4.cursor()
-        	#                 	sql4="DELETE FROM  section_time WHERE section_id IN\
-        	#                    	 (SELECT section_id FROM section WHERE regiscourse_id = \
-        	#                    	 (SELECT regiscourse_id FROM regiscourse WHERE course_id=\
-        	#                   	  (SELECT course_id FROM course WHERE course_code='%s')))"%(course_id)
-        	#                		cursor4.execute(sql4);
-        	#                 	conn4.commit();
-        	#                 	conn4.close();
-
-        	#             	conn6 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#             	cursor6 = conn6.cursor()
-        	#             	sql6="DELETE FROM section WHERE regiscourse_id = \
-        	#                 	(SELECT regiscourse_id FROM regiscourse WHERE course_id=\
-        	#                 	(SELECT course_id FROM course WHERE course_code='%s'))"%(course_id)
-        	#             	cursor6.execute(sql6);
-        	#             	conn6.commit();
-        	#             	conn6.close();
-
-        	#         conn8 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#         cursor8 = conn8.cursor()
-        	#         sql8="SELECT prerequisite_id FROM prerequisite_course\
-        	#                     WHERE course_id=(SELECT course_id FROM course WHERE course_code = '%s')"%(course_id)
-        	#         cursor8.execute(sql8)
-        	#         for row in cursor8.fetchall():
-        	#             	prerequisite=row[0]       
-        	#         conn8.commit()
-        	#         conn8.close();
-
-        	#         if prerequisite!="":
-        	#             	conn7 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#             	cursor7 = conn7.cursor()
-        	#             	sql7="DELETE FROM prerequisite_course\
-        	#                     WHERE course_id=(SELECT course_id FROM course WHERE course_code = '%s')"%(course_id)
-        	#             	cursor7.execute(sql7)        
-        	#             	conn7.commit()
-        	#             	conn7.close();
-
-        	        
-        	        
-        	#         conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#         cursor = conn.cursor()
-        	#         sql="DELETE FROM regiscourse WHERE course_id=(SELECT course_id FROM course WHERE course_code='%s')"%(course_id)
-        	#         cursor.execute(sql);
-        	#         conn.commit();
-        	#         conn.close();
 
     	        conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
     	        cursor = conn.cursor()
@@ -1167,8 +1085,10 @@ class DeleteSectionHandler(webapp2.RequestHandler):
 		Core.login(self)
 
 		session = get_current_session()
+		http = decorator.http()
     	
         	course_id=self.request.get('course_id')
+		section_number = self.request.get('section_number')
 
                 conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                 cursor = conn.cursor()
@@ -1179,6 +1099,9 @@ class DeleteSectionHandler(webapp2.RequestHandler):
                 sql="DELETE FROM section WHERE section_id='%d'"%(section_id)
                 cursor.execute(sql);
                 conn.commit();
+
+		email = "prinya-course-" + course_id + "-" + section_number + session['domain']
+    		result = service.groups().delete(groupKey=email).execute(http=http)
 
                 utc = pytz.utc
                 date_object = datetime.today()
@@ -1218,6 +1141,7 @@ class DeleteSectimeHandler(webapp2.RequestHandler):
 		Core.login(self)
 
 		session = get_current_session()
+		http = decorator.http()
 
             	course_id=self.request.get('course_id')
             	sectime_id=self.request.get('sectime_id')

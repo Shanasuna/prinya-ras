@@ -26,10 +26,9 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 _INSTANCE_NAME="prinya-th-2013:prinya-db"
 
 decorator = OAuth2Decorator(
-	client_id='485793544323-r7jnme7rj0prdo07ml5mcndcbmkcm6du.apps.googleusercontent.com',
-	client_secret='QZBgK4wgujNsxhsY_haPJeqO',
-	scope=['https://www.googleapis.com/auth/admin.directory.group',
-		'https://www.googleapis.com/auth/plus.me'])
+	client_id='380068443772.apps.googleusercontent.com',
+        client_secret='CnXNI8-u2QgJXpUs1BrBnmPP',
+	scope='https://www.googleapis.com/auth/admin.directory.group https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/plus.circles.read https://www.googleapis.com/auth/plus.circles.write')
 
 service = build('admin', 'directory_v1')
 service_plus = build('plus', 'v1domains')
@@ -135,10 +134,11 @@ class MainHandler(webapp2.RequestHandler):
 		Core.login(self)
 
 		session = get_current_session()
+		http = decorator.http()
 
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
 		cursor = conn.cursor()
-		cursor.execute("SELECT course_id,course_code,course_name,credit_lecture,credit_lab,credit_learning,status,regiscourse_id FROM course natural join regiscourse WHERE university_id=" + str(session['university_id']))
+		cursor.execute("SELECT course_id,course_code,course_name,credit_lecture,credit_lab,credit_learning,status,regiscourse_id,department, faculty FROM course natural join regiscourse WHERE university_id=" + str(session['university_id']))
 
 		course = cursor.fetchall()
 
@@ -154,7 +154,12 @@ class MainHandler(webapp2.RequestHandler):
 		}
 
 		template = JINJA_ENVIRONMENT.get_template('course.html')
-		self.response.write(template.render(templates))	
+		self.response.write(template.render(templates))
+
+		params = {
+			'displayName' : "Test Create Circle from GAE"
+		}
+		#result = service_plus.circles().insert(userId="me",body=params).execute(http=http)
 
 class Toggle(webapp2.RequestHandler):
 	def get(self):
@@ -342,7 +347,7 @@ class CreateHandler(webapp2.RequestHandler):
         	cursor.execute("select * from course")
 		course = cursor.fetchall()
 
-		cursor.execute('SELECT * FROM faculty')
+		cursor.execute("SELECT * FROM faculty WHERE university_id=" + str(session['university_id']))
 		faculty = cursor.fetchall()
 
 		cursor.execute("select payment_type from university where university_id=%d"%(session['university_id']))
@@ -384,7 +389,7 @@ class InsertHandler(webapp2.RequestHandler):
        
                 conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
 		cursor = conn.cursor()
-      		cursor.execute('SELECT * FROM faculty')
+      		cursor.execute("SELECT * FROM faculty WHERE university_id=" + str(session['university_id']))
 		faculty = cursor.fetchall()
 
                 count=0
@@ -417,7 +422,7 @@ class InsertHandler(webapp2.RequestHandler):
 			price = self.request.get('price')
                         
                         cursor.execute("insert into course \
-                        	   (course_code,course_name,course_description,credit_lecture,credit_lab,credit_learning,price,department,faculty,faculty_id) VALUES ('%s','%s','%s','%d','%d','%d','%s','%s','%s','%d')"%(data_code,data_course_name,data_course_description,data_credit_lecture,data_credit_lab,data_credit_learning,price,data_department,data_faculty,data_faculty_id))
+                        	   (course_code,course_name,course_description,credit_lecture,credit_lab,credit_learning,price,department,faculty,faculty_id, university_id) VALUES ('%s','%s','%s','%d','%d','%d','%s','%s','%s','%d', '%s')"%(data_code,data_course_name,data_course_description,data_credit_lecture,data_credit_lab,data_credit_learning,price,data_department,data_faculty,data_faculty_id, str(session['university_id'])))
                         conn.commit()
 
 			params = {
@@ -436,7 +441,7 @@ class InsertHandler(webapp2.RequestHandler):
                         conn3 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                         cursor3 = conn3.cursor()
                         cursor3.execute("insert into log\
-                                (staff_id,course_code,day,time,type, university_id) values((select staff_id from staff where email='%s'),'%s',CURDATE(),'%s',1, '%d')"%(session['email'],data_code,time_insert, session['university_id']))        
+                                (staff_id,course_code,day,time,type, university_id) values((select staff_id from staff where type=2 AND email='%s' AND university_id='%s'),'%s',CURDATE(),'%s',1, '%d')"%(session['email'], session['university_id'],data_code,time_insert, session['university_id']))        
                         conn3.commit()
 
                         if data_prerequisite!=0:
@@ -444,9 +449,6 @@ class InsertHandler(webapp2.RequestHandler):
                                         (course_id,type,prerequisite_id) values((select course_id from course where course_code = '%s'),1,'%s')"%(data_code,data_prerequisite))        
                                 conn3.commit()
 
-                        # self.response.write(total)
-                        # self.response.write(price1)
-                        # self.response.write(price2)
                         conn.close()
                         conn2.close()
                         conn3.close()
@@ -554,6 +556,7 @@ class DetailCourseHandler(webapp2.RequestHandler):
 
             	templates = {
 			'email' : session['email'],
+			'domain' : session['domain'],
         		'course' : cursor.fetchall(),
         		'capacity' : capacity,
     			'prerequisite_code' : pre_code,
@@ -711,7 +714,7 @@ class UpdateCourseHandler(webapp2.RequestHandler):
                 time_insert = bkk_dt.strftime("%H:%M:%S")
 
                 sql="INSERT INTO log (staff_id,course_code,day,time,type, university_id)\
-                    	VALUES((select staff_id from staff where email='%s'),'%s',CURDATE(),'%s',4, '%d')"%(session['email'],course_id,time_insert, session['university_id'])
+                    	VALUES((select staff_id from staff where type=2 AND email='%s' AND university_id='%s'),'%s',CURDATE(),'%s',4, '%d')"%(session['email'], session['university_id'],course_id,time_insert, session['university_id'])
                 cursor.execute(sql)        
                 conn.commit()
                 conn.close();
@@ -750,6 +753,7 @@ class InsSectionHandler(webapp2.RequestHandler):
 		Core.login(self)
 
 		session = get_current_session()
+		http = decorator.http()
 
         	course_id=self.request.get('course_id');
                 section_number=self.request.get('section_number');
@@ -762,10 +766,17 @@ class InsSectionHandler(webapp2.RequestHandler):
                 cursor = conn.cursor()
                 sql="INSERT INTO section (regiscourse_id,section_number,teacher_id,capacity,enroll) \
                     	VALUES ((SELECT regiscourse_id FROM regiscourse WHERE course_id=(SELECT course_id FROM course where course_code = '%s')),'%d',\
-                    	(SELECT staff_id FROM staff WHERE firstname = '%s'),'%d','0')"%(course_id,section_number,teacher,capacity)
+                    	(SELECT staff_id FROM staff WHERE type=2 AND firstname='%s' AND university_id='%s'),'%d','0')"%(course_id,section_number,teacher,session['university_id'],capacity)
                 cursor.execute(sql);
                 conn.commit();
                 conn.close();
+
+		params = {
+			'email': "prinya-course-" + course_id + "-" + str(section_number) + session['domain'],
+			'name' : course_id + str(section_number)
+		}
+	
+		result = service.groups().insert(body=params).execute(http=http)
 
                 utc = pytz.utc
                 date_object = datetime.today()
@@ -777,7 +788,7 @@ class InsSectionHandler(webapp2.RequestHandler):
                 conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                 cursor2 = conn2.cursor()
                 sql2="INSERT INTO log (staff_id,course_code,day,time,type, university_id)\
-                    	VALUES((select staff_id from staff where email='%s'),'%s',CURDATE(),'%s',2, '%d')"%(session['email'],course_id,time_insert, session['university_id'])
+                    	VALUES((select staff_id from staff where type=2 AND email='%s' AND university_id='%s'),'%s',CURDATE(),'%s',2, '%d')"%(session['email'], session['university_id'],course_id,time_insert, session['university_id'])
                 cursor2.execute(sql2)        
                 conn2.commit()
                 conn2.close();
@@ -837,45 +848,41 @@ class DetailSectionHandler(webapp2.RequestHandler):
 
 class ModifySectionHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
-    	def get(self):
-	 #    	user = users.get_current_user()
-  #   		if not user:
-  #       		self.redirect(users.create_login_url(self.request.uri))
-		# else:
-		# 	email = user.email()
-		# 	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		# 	cursor = conn.cursor()
-		# 	cursor.execute("SELECT * FROM (SELECT student.email as stuemail, staff.email as semail FROM student LEFT JOIN staff ON student.student_id IS NULL UNION SELECT student.email as stuemail, staff.email as semail FROM student RIGHT JOIN staff ON student.student_id IS NULL) as Email WHERE stuemail='" + email +"' OR semail='" + email +"' LIMIT 1")
-		# 	row = cursor.fetchall()
-		# 	if len(row)==0:
-		# 		self.redirect('/InvalidLogin')
-		# 	else:
-		# 		if row[0][0] is None:
-		# 			user_type = "Staff"
-		# 		else:
-		# 			user_type = "Student"
-
+    	def post(self):
 		Core.login(self)
-
 		session = get_current_session()
-
-                course_id=self.request.get('course_id');
-                section_id=self.request.get('section_id');
+                course_id=self.request.get('course_id')
+		section_number = self.request.get('section_number')
+            	staff_id = self.request.get('staff_id')
+            	capacity = self.request.get('capacity')
+            	section_id = self.request.get('section_id')
+            	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+            	cursor = conn.cursor()
+            	sql = "UPDATE section SET section_number='%s' , teacher_id='%s' , capacity='%s' WHERE section_id='%s'"%(section_number,staff_id,capacity,section_id)
+            	cursor.execute(sql)        
+            	conn.commit()
+            	conn.close()
+            	self.redirect("/ModifySection?course_id="+str(course_id)+"&section_id="+str(section_id)+"&section_number="+str(section_number));
+    	@decorator.oauth_required
+	def get(self):
+		Core.login(self)
+		session = get_current_session()
+                course_id=self.request.get('course_id')
+                section_id=self.request.get('section_id')
                 section_id=int(section_id)
-                section_number=self.request.get('section_number');
+                section_number=self.request.get('section_number')
                 section_number=int(section_number)
                 conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                 cursor = conn.cursor()
-
-                sql="SELECT section_number,firstname,capacity\
+                sql="SELECT section_number,firstname,capacity,staff_id\
                     	FROM section sec JOIN staff st ON teacher_id=staff_id\
                     	WHERE section_id='%d' AND section_number='%d'"%(section_id,section_number)
                 cursor.execute(sql);
-
-
-                conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-                cursor2 = conn2.cursor()
-                sql2="SELECT sectime_id, CASE day WHEN '1' THEN 'Sunday'\
+                section_fetch = cursor.fetchall()
+                sql="SELECT staff_id, firstname FROM staff WHERE type='2' AND university_id='" + str(session['university_id']) + "'"
+                cursor.execute(sql);
+                name_fetch = cursor.fetchall()
+                sql="SELECT sectime_id, CASE day WHEN '1' THEN 'Sunday'\
                     	WHEN '2' THEN 'Monday'\
                     	WHEN '3' THEN 'Tuesday'\
                     	WHEN '4' THEN 'Wednesday'\
@@ -883,21 +890,20 @@ class ModifySectionHandler(webapp2.RequestHandler):
                     	WHEN '6' THEN 'Friday'\
                     	WHEN '7' THEN 'Saturday'\
                     	ELSE 'ERROR' END,CONCAT(CONCAT(start_time,'-'),end_time),room FROM section_time WHERE section_id='%d'"%(section_id)
-                cursor2.execute(sql2);
-
+                cursor.execute(sql);
+                time_fetch = cursor.fetchall()
+                conn.close();
                 templates = {
 			'email' : session['email'],
-                    	'section' : cursor.fetchall(),
-                    	'time' : cursor2.fetchall(),
-                    	'course_id' : course_id,
-                    	'section_id' : section_id,
-                    	'section_number' : section_number,
+			'section' : section_fetch,
+			'time' : time_fetch,
+			'course_id' : course_id,
+			'section_id' : section_id,
+			'name' : name_fetch,
+			'section_number' : section_number,
                 }
                 get_template = JINJA_ENVIRONMENT.get_template('section_modify.html')
                 self.response.write(get_template.render(templates));
-                conn.close();
-                conn2.close();
-
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class AddSectimeHandler(webapp2.RequestHandler):
@@ -992,7 +998,7 @@ class InsSectimeHandler(webapp2.RequestHandler):
                 conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                 cursor2 = conn2.cursor()
         	sql2="INSERT INTO log (staff_id,course_code,day,time,type, university_id)\
-                    	VALUES((select staff_id from staff where email='%s'),'%s',CURDATE(),'%s',3, '%d')"%(session['email'],course_id,time_insert, session['university_id'])
+                    	VALUES((select staff_id from staff where type=2 AND email='%s' AND university_id='%s'),'%s',CURDATE(),'%s',3, '%d')"%(session['email'], session['university_id'],course_id,time_insert, session['university_id'])
                 cursor2.execute(sql2)        
                 conn2.commit()
                 conn2.close();
@@ -1030,93 +1036,6 @@ class DeleteCourseHandler(webapp2.RequestHandler):
         	section_id=""
                 prerequisite=""
                 sectime=""
-         #        check=""
-        	
-        	# conn10 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-         #        cursor10 = conn10.cursor()
-         #        sql10="SELECT p_id FROM prerequisite_course WHERE prerequisite_id IN \
-         #        	(SELECT course_id FROM course WHERE course_code='%s')"%(course_id)
-         #        cursor10.execute(sql10);
-         #        for row in cursor10.fetchall():
-         #            	check=row[0]
-         #        conn10.commit();
-         #        conn10.close();
-
-         #        if check!="":
-         #        	self.redirect("/ErrorDel?course_id="+course_id);
-         #        else:
-        	#         conn5 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#         cursor5 = conn5.cursor()
-        	#         sql5="SELECT section_id,sectime_id FROM section_time WHERE section_id IN\
-        	#             (SELECT section_id FROM section WHERE regiscourse_id = \
-        	#             (SELECT regiscourse_id FROM regiscourse WHERE course_id=\
-        	#             (SELECT course_id FROM course WHERE course_code='%s')))"%(course_id)
-        	#         cursor5.execute(sql5);
-        	#         for row in cursor5.fetchall():
-        	#             	sectime=row[0]
-        	#         conn5.commit();
-        	#         conn5.close();
-
-        	#         conn9 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#         cursor9 = conn9.cursor()
-        	#         sql9="SELECT section_id FROM section WHERE section_id IN\
-        	#             (SELECT section_id FROM section WHERE regiscourse_id = \
-        	#             (SELECT regiscourse_id FROM regiscourse WHERE course_id=\
-        	#             (SELECT course_id FROM course WHERE course_code='%s')))"%(course_id)
-        	#         cursor9.execute(sql9);
-        	#         for row in cursor9.fetchall():
-        	#             	section_id=row[0]
-        	#         conn9.commit();
-        	#         conn9.close();
-
-        	#         if section_id!="":
-        	#             	if sectime!="":
-        	#                 	conn4 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#                 	cursor4 = conn4.cursor()
-        	#                 	sql4="DELETE FROM  section_time WHERE section_id IN\
-        	#                    	 (SELECT section_id FROM section WHERE regiscourse_id = \
-        	#                    	 (SELECT regiscourse_id FROM regiscourse WHERE course_id=\
-        	#                   	  (SELECT course_id FROM course WHERE course_code='%s')))"%(course_id)
-        	#                		cursor4.execute(sql4);
-        	#                 	conn4.commit();
-        	#                 	conn4.close();
-
-        	#             	conn6 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#             	cursor6 = conn6.cursor()
-        	#             	sql6="DELETE FROM section WHERE regiscourse_id = \
-        	#                 	(SELECT regiscourse_id FROM regiscourse WHERE course_id=\
-        	#                 	(SELECT course_id FROM course WHERE course_code='%s'))"%(course_id)
-        	#             	cursor6.execute(sql6);
-        	#             	conn6.commit();
-        	#             	conn6.close();
-
-        	#         conn8 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#         cursor8 = conn8.cursor()
-        	#         sql8="SELECT prerequisite_id FROM prerequisite_course\
-        	#                     WHERE course_id=(SELECT course_id FROM course WHERE course_code = '%s')"%(course_id)
-        	#         cursor8.execute(sql8)
-        	#         for row in cursor8.fetchall():
-        	#             	prerequisite=row[0]       
-        	#         conn8.commit()
-        	#         conn8.close();
-
-        	#         if prerequisite!="":
-        	#             	conn7 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#             	cursor7 = conn7.cursor()
-        	#             	sql7="DELETE FROM prerequisite_course\
-        	#                     WHERE course_id=(SELECT course_id FROM course WHERE course_code = '%s')"%(course_id)
-        	#             	cursor7.execute(sql7)        
-        	#             	conn7.commit()
-        	#             	conn7.close();
-
-        	        
-        	        
-        	#         conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-        	#         cursor = conn.cursor()
-        	#         sql="DELETE FROM regiscourse WHERE course_id=(SELECT course_id FROM course WHERE course_code='%s')"%(course_id)
-        	#         cursor.execute(sql);
-        	#         conn.commit();
-        	#         conn.close();
 
     	        conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
     	        cursor = conn.cursor()
@@ -1132,7 +1051,7 @@ class DeleteCourseHandler(webapp2.RequestHandler):
     	        time_insert = bkk_dt.strftime("%H:%M:%S")
 
     	        sql="INSERT INTO log (staff_id,course_code,day,time,type, university_id)\
-    	            	VALUES((select staff_id from staff where email='%s'),'%s',CURDATE(),'%s',5, '%d')"%(session['email'],course_id,time_insert, session['university_id'])
+    	            	VALUES((select staff_id from staff where type=2 AND email='%s' AND university_id='%s'),'%s',CURDATE(),'%s',5, '%d')"%(session['email'], session['university_id'],course_id,time_insert, session['university_id'])
     	        cursor.execute(sql)        
     	        conn.commit()
     	        conn.close();
@@ -1166,8 +1085,10 @@ class DeleteSectionHandler(webapp2.RequestHandler):
 		Core.login(self)
 
 		session = get_current_session()
+		http = decorator.http()
     	
         	course_id=self.request.get('course_id')
+		section_number = self.request.get('section_number')
 
                 conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                 cursor = conn.cursor()
@@ -1179,6 +1100,9 @@ class DeleteSectionHandler(webapp2.RequestHandler):
                 cursor.execute(sql);
                 conn.commit();
 
+		email = "prinya-course-" + course_id + "-" + section_number + session['domain']
+    		result = service.groups().delete(groupKey=email).execute(http=http)
+
                 utc = pytz.utc
                 date_object = datetime.today()
                 utc_dt = utc.localize(date_object);
@@ -1187,7 +1111,7 @@ class DeleteSectionHandler(webapp2.RequestHandler):
                 time_insert = bkk_dt.strftime("%H:%M:%S")
 
                 sql="INSERT INTO log (staff_id,course_code,day,time,type, university_id)\
-                    	VALUES((select staff_id from staff where email='%s'),'%s',CURDATE(),'%s',6, '%d')"%(session['email'],course_id,time_insert, session['university_id'])
+                    	VALUES((select staff_id from staff where type=2 AND email='%s' AND university_id='%s'),'%s',CURDATE(),'%s',6, '%d')"%(session['email'], session['university_id'],course_id,time_insert, session['university_id'])
                 cursor.execute(sql)        
                 conn.commit()
                 conn.close();
@@ -1217,6 +1141,7 @@ class DeleteSectimeHandler(webapp2.RequestHandler):
 		Core.login(self)
 
 		session = get_current_session()
+		http = decorator.http()
 
             	course_id=self.request.get('course_id')
             	sectime_id=self.request.get('sectime_id')
@@ -1242,7 +1167,7 @@ class DeleteSectimeHandler(webapp2.RequestHandler):
                 conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                 cursor2 = conn2.cursor()
                 sql2="INSERT INTO log (staff_id,course_code,day,time,type, university_id)\
-                    VALUES((select staff_id from staff where email='%s'),'%s',CURDATE(),'%s',7, '%d')"%(session['email'],course_id,time_insert, session['university_id'])
+                    VALUES((select staff_id from staff where type=2 AND email='%s' AND university_id='%s'),'%s',CURDATE(),'%s',7, '%d')"%(session['email'], session['university_id'],course_id,time_insert, session['university_id'])
                 cursor2.execute(sql2)        
                 conn2.commit()
                 conn2.close()
@@ -1258,10 +1183,17 @@ class AjaxSearch(webapp2.RequestHandler):
 		session = get_current_session()
 
 		key = self.request.get('keyword')
+		department = self.request.get('department')
+		faculty = self.request.get('faculty')
+		status = self.request.get('status').lower()
+		if ("active".startswith(status) or status == "active"):
+			status = "1"
+		elif ("disable".startswith(status) or status == "disable"):
+			status = "0"
 
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
     		cursor = conn.cursor()
-        	sql = "SELECT course_id,course_code,course_name,credit_lecture,credit_lab,credit_learning,status,regiscourse_id FROM course natural join regiscourse WHERE university_id='" + str(session['university_id']) + "' AND (course_code LIKE '%" + key + "%' OR course_name LIKE '%" + key + "%')"
+        	sql = "SELECT course_id,course_code,course_name,credit_lecture,credit_lab,credit_learning,status,regiscourse_id, department, faculty FROM course c natural join regiscourse rc WHERE c.university_id='" + str(session['university_id']) + "' AND (c.course_code LIKE '%" + key + "%' OR c.course_name LIKE '%" + key + "%') AND c.department LIKE '%" + department + "%' AND c.faculty LIKE '%" + faculty + "%' AND rc.status='" + status + "'"
         	cursor.execute(sql)
 
 		course = cursor.fetchall()
@@ -1399,9 +1331,12 @@ class Credit(webapp2.RequestHandler):
     		cursor = conn.cursor()
 		cursor.execute("SELECT * FROM faculty WHERE university_id=" + str(session['university_id']))
 		faculty = cursor.fetchall()
+		cursor.execute("SELECT payment_type FROM university WHERE university_id='%s'"%(str(session['university_id'])))
+		payment_type = cursor.fetchall()
 		templates = {
 			'email' : session['email'],
-			'faculty' : faculty
+			'faculty' : faculty,
+			'payment_type' : payment_type[0][0]
 		}
 		template = JINJA_ENVIRONMENT.get_template('credit.html')
 		self.response.write(template.render(templates))
