@@ -32,7 +32,6 @@
               <td width="150" align="center" bgcolor="#FFFFCC"><a href="/Credit">Credit</a></td>
               <td width="250" align="center" bgcolor="#FFFFCC"><a href="/ManageUser">Manage User</a></td>
               <td width="250" align="center" bgcolor="#FFFFCC"><a href="/ManageFaculty">Manage Faculty</a></td>
-              <td width="250" align="center" bgcolor="#FFFFCC"><a href="/ManageUniversity">Manage University</a></td>
               {% if(super==1) %}
               <td width="250" align="center" bgcolor="#FFFFCC"><a href="/ManageUniversity">Manage University</a></td>
               {% endif %}
@@ -43,20 +42,26 @@
       <tr>
         <td align="left" bgcolor="#FFFFCC">
           <div style="margin-top:10px; margin-bottom:10px;">
-            <form action="/CreditHandler" method="POST" enctype="multipart/form-data">
+            <form action="/ManageUniversityHandler" method="POST" enctype="multipart/form-data">
               <div>
-                <input type="radio" class="rType" id="spec" name="rate" value="spec">Fee per Subject<br>
-                <input type="radio" class="rType" id="rate" name="rate" value="flat">Flat Rate
-                <div id="viewFlatRate">
-                  <select name="faculty" id="faculty">
-                    {% for row in faculty  %}
-                    <option value="{{ row[0] }}">{{ row[1] }}</option>
-                    {% endfor %}
-                  </select>
-                  <select name="department" id="department">
-                  </select>
-                  <input type="text" name="price" id="price" value="">Baht
-                </div>
+                <table border="1">
+                  <tr>
+                    <td>Title</td>
+                    <td>Domain</td>
+                    <td></td>
+                  </tr>
+                  {% for row in universities %}
+                  <tr>
+                    <td align="left" bgcolor="#FFFFCC">{{ row[1] }}</td>
+                    <td align="left" bgcolor="#FFFFCC">{{ row[2] }}</td>
+                    <td align="center" bgcolor="#FFFFCC"><a href="/ManageUniversityHandler?university={{ row[0] }}">Delete</a></td>
+                  </tr>
+                  {% endfor %}
+                </table>
+              </div>
+              <div>
+                Title : <input type="text" name="title" id="title" value=""><br/>
+                Domain : <input type="text" name="domain" id="domain" value="">
               </div>
               <input style="width:140px; height:30px;" type="button" name="back" id="back" value="Back" onclick="window.history.back()">
               <input style="width:140px; height:30px;" type="submit" name="save" id="save" value="Save">
@@ -67,38 +72,3 @@
     </table>
   </body>
 </html>
-<script type="text/javascript">
-$(function() {
-      var faculty = [];
-      {% for row in faculty  %}
-          var department = "{{row[5]}}".split(',');
-            var array = {
-              'faculty' : "{{row[0]}}",
-              'department' : department
-            };
-            faculty.push(array);
-      {% endfor %} 
-
-      $("#faculty").change(function() {
-        var value = $(this).val();
-        
-        $.each(faculty, function(i,v) {
-          if(v.faculty ==value) {
-              $("#department").empty();
-            $.each(v.department, function(i2,v2) {
-              $("#department").append('<option value="' + v2  + '">' + v2 + '</option>');
-            }); 
-          }
-        });
-      });
-      $("#faculty").trigger('change');
-
-      var payment_type = "{{payment_type}}";
-      if(payment_type == "1") { 
-        $("#spec").prop('checked', true);
-      } else {
-        $("#rate").prop('checked', true);
-        $("#viewFlatRate").show();
-      }
-  });
-</script>

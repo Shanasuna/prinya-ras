@@ -71,12 +71,13 @@ class Core():
 
 			domain = email[email.find('@'):len(email)]
 			session['domain'] = domain
-			cursor.execute("SELECT university_id FROM university WHERE domain='%s' LIMIT 1"%(domain))
+			cursor.execute("SELECT university_id, super FROM university WHERE domain='%s' LIMIT 1"%(domain))
 			row = cursor.fetchall()
 			if len(row)==0:
 				self.redirect('/InvalidLogin')
 			else:
 				session['university_id'] = row[0][0]
+				session['super'] = row[0][1]
 
 			cursor.execute("SELECT staff_id, firstname, lastname FROM staff WHERE email='%s' AND university_id='%s' LIMIT 1"%(email, session['university_id']))
 			row = cursor.fetchall()
@@ -148,6 +149,7 @@ class MainHandler(webapp2.RequestHandler):
 		faculty = cursor.fetchall()
 		templates = {
 			'email' : session['email'],
+			'super' : session['super'],
 			'course' : course,
 			'enroll' : enroll,
 			'faculty' : faculty,
@@ -496,6 +498,7 @@ class Notification(webapp2.RequestHandler):
 
 		templates = {
 			'email' : session['email'],
+			'super' : session['super'],
 			'log' : cursor.fetchall()
 		}
 
@@ -622,6 +625,7 @@ class ModifyCourseHandler(webapp2.RequestHandler):
 
             	templates = {
 			'email' : session['email'],
+			'domain' : session['domain'],
         		'course' : course,
                 	'course2' : cursor2.fetchall(),
                		'course3' : cursor3.fetchall(),
@@ -773,7 +777,7 @@ class InsSectionHandler(webapp2.RequestHandler):
 
 		params = {
 			'email': "prinya-course-" + course_id + "-" + str(section_number) + session['domain'],
-			'name' : course_id + str(section_number)
+			'name' : course_id + "-" + str(section_number)
 		}
 	
 		result = service.groups().insert(body=params).execute(http=http)
@@ -1246,6 +1250,7 @@ class ManageUser(webapp2.RequestHandler):
 			'students' : students,
 			'staffs' : staffs,
 			'email' : session['email'],
+			'super' : session['super'],
 			'upload_url' : upload_url
 		}
 		template = JINJA_ENVIRONMENT.get_template('manage_user.html')
@@ -1335,6 +1340,7 @@ class Credit(webapp2.RequestHandler):
 		payment_type = cursor.fetchall()
 		templates = {
 			'email' : session['email'],
+			'super' : session['super'],
 			'faculty' : faculty,
 			'payment_type' : payment_type[0][0]
 		}
@@ -1369,6 +1375,7 @@ class CreditHandler(webapp2.RequestHandler):
 		self.redirect('/')
 
 class ManageFaculty(webapp2.RequestHandler):
+	@decorator.oauth_required
 	def post(self):
 		session = get_current_session()
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
@@ -1402,7 +1409,7 @@ class ManageFaculty(webapp2.RequestHandler):
 			conn.commit()
 			conn.close()
 			self.response.write("Update Successfully<br><a href='/ManageFaculty'>back</a>")
-
+	@decorator.oauth_required
 	def get(self):
 		session = get_current_session()
 
@@ -1417,6 +1424,77 @@ class ManageFaculty(webapp2.RequestHandler):
 		}
 		template = JINJA_ENVIRONMENT.get_template('addfaculty.html')
 		self.response.write(template.render(templates))
+
+class ManageUniversity(webapp2.RequestHandler):
+	@decorator.oauth_required
+	def get(self):
+		Core.login(self)
+
+		session = get_current_session()
+
+		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+    		cursor = conn.cursor()
+		cursor.execute("SELECT university_id, title, domain FROM university")
+		universities = cursor.fetchall()
+		templates = {
+			'email' : session['email'],
+			'universities' : universities
+		}
+		template = JINJA_ENVIRONMENT.get_template('manage_university.html')
+		self.response.write(template.render(templates))	
+
+class ManageUniversityHandler(webapp2.RequestHandler):
+	@decorator.oauth_required
+	def post(self):
+		session = get_current_session()
+
+		title = self.request.get('title')
+		domain = self.request.get('domain')
+
+		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+    		cursor = conn.cursor()
+		cursor.execute("INSERT INTO university (title, domain) VALUES ('" + title + "', '" + domain + "')")
+		conn.commit()
+		conn.close()
+		self.redirect('/ManageUniversity')
+
+	@decorator.oauth_required
+	def get(self):
+		session = get_current_session()
+
+		university_id = self.request.get('university')
+
+		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+    		cursor = conn.cursor()
+		cursor.execute("DELETE FROM university WHERE university_id='" + university_id + "'")
+		conn.commit()
+		conn.close()
+		self.redirect('/ManageUniversity')
+
+class UpdateSectionEveryDay(webapp2.RequestHandler):
+	def get(self):
+		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+		cursor = conn.cursor()
+
+		utc = pytz.utc
+		date_object = datetime.today()
+		utc_dt = utc.localize(date_object);
+		bkk_tz = timezone("Asia/Bangkok");
+		bkk_dt = bkk_tz.normalize(utc_dt.astimezone(bkk_tz))
+		date = bkk_dt.strftime("%Y-%m-%d")
+		sql = "SELECT semester_number, year, university_id FROM academic_year WHERE end_date='%s'"%(date)
+		cursor.execute(sql)
+		end_date = cursor.fetchall()
+		for row in end_date:
+			sql = "SELECT regiscourse_id FROM regiscourse JOIN course ON course.course_id=regiscourse.course_id WHERE semester='%s' AND year='%s' AND university_id='%s'"%(row[0],row[1],row[2])
+			cursor.execute(sql)
+			regiscourse = cursor.fetchall()
+			for row2 in regiscourse:
+				sql = "UPDATE regiscourse SET status='0' WHERE regiscourse_id='%s'"%(row2[0])
+				cursor.execute(sql)
+				conn.commit()
+		conn.close()
+
 
 
 app = webapp2.WSGIApplication([
@@ -1444,9 +1522,12 @@ app = webapp2.WSGIApplication([
 	('/upload', UploadHandler),
 	('/ManageUser', ManageUser),
 	('/ManageFaculty', ManageFaculty),
+	('/ManageUniversity', ManageUniversity),
+	('/ManageUniversityHandler', ManageUniversityHandler),
 	('/UserDelete', UserDelete),
 	('/Credit', Credit),
 	('/CreditHandler', CreditHandler),
+	('/UpdateSectionEveryDay', UpdateSectionEveryDay),
 	('/Logout', Logout),
 	(decorator.callback_path, decorator.callback_handler())    
 ], debug=True)

@@ -1,0 +1,4 @@
+cron:
+- description: scrape xml
+  url: /UpdateSectionEveryDay
+  schedule: every day 00:00
