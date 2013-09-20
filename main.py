@@ -4,6 +4,19 @@ import webapp2
 import json
 import StringIO
 import csv
+"""
+import getopt
+import mimetypes
+import os.path
+import sys
+"""
+import atom.data
+import gdata.sample_util
+import gdata.sites.client
+import gdata.sites.data
+import gdata.acl.data
+import gdata.gauth
+
 from google.appengine.api import rdbms
 from google.appengine.api import users
 from apiclient.discovery import build
@@ -26,8 +39,8 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 _INSTANCE_NAME="prinya-th-2013:prinya-db"
 
 decorator = OAuth2Decorator(
-	client_id='97473573628.apps.googleusercontent.com',
-        client_secret='MUHv0RWozapApFl_BfOGZpBq',
+	client_id='635092385463.apps.googleusercontent.com',
+	client_secret='Ut-esrt4aLIsKaMvPKsbvlzV',
 	scope='https://www.googleapis.com/auth/admin.directory.group https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/plus.circles.read https://www.googleapis.com/auth/plus.circles.write https://sites.google.com/feeds/')
 
 service = build('admin', 'directory_v1')
@@ -420,7 +433,7 @@ class InsertHandler(webapp2.RequestHandler):
                             		data_faculty =row[1]
 
 			price = self.request.get('price')
-                        
+            
                         cursor.execute("insert into course \
                         	   (course_code,course_name,course_description,credit_lecture,credit_lab,credit_learning,price,department,faculty,faculty_id, university_id) VALUES ('%s','%s','%s','%d','%d','%d','%s','%s','%s','%d', '%s')"%(data_code,data_course_name,data_course_description,data_credit_lecture,data_credit_lab,data_credit_learning,price,data_department,data_faculty,data_faculty_id, str(session['university_id'])))
                         conn.commit()
@@ -429,7 +442,31 @@ class InsertHandler(webapp2.RequestHandler):
 				'email': "prinya-course-" + data_code + session['domain'],
 				'name' : data_code
 			}
-	
+			
+			CONSUMER_KEY='635092385463.apps.googleusercontent.com'
+			CONSUMER_SECRET='Ut-esrt4aLIsKaMvPKsbvlzV'
+			SCOPES='https://sites.google.com/feeds/'
+			requestor_id = 'jakkrit_junrat@kkumail.com'
+			client = gdata.sites.client.SitesClient(source='jakkrit-sitesample-001')
+			#client.auth_token = gdata.gauth.TwoLeggedOAuthHmacToken(
+			#	CONSUMER_KEY, CONSUMER_SECRET, requestor_id)
+			client.domain = 'kkumail.com'
+			
+			oauth_callback_url = 'http://%s/get_access_token' % self.request.host
+			request_token = client.GetOAuthToken(
+				SCOPES, oauth_callback_url, CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+			gdata.gauth.AeSave(request_token, 'myKey')
+			
+			self.redirect(request_token.generate_authorization_url(google_apps_domain=client.domain))
+			saved_request_token = gdata.gauth.AeLoad('myKey')
+			request_token = gdata.gauth.AuthorizeRequestToken(saved_request_token, self.request.uri)
+			access_token = client.GetAccessToken(request_token)
+			#client.auth_token = gdata.gauth.OAuthHmacToken(CONSUMER_KEY, CONSUMER_SECRET, TOKEN,
+            #                                   TOKEN_SECRET, gdata.gauth.ACCESS_TOKEN)
+			client.auth_token = access_token
+                                               
+			entry = client.CreateSite(data_course_name, description='Testing of Prinya course site', theme='slate')
+			
 			result = service.groups().insert(body=params).execute(http=http)
 
                         conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
