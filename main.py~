@@ -48,6 +48,9 @@ class Core():
 	def __init__(self):
 		self.response.write("Create CoreData")
 
+	# This function is to initialize important variables
+        # such as FIRSTNAME, LASTNAME, and
+        # UNIVERSITY_ID of the user logs on
 	@staticmethod
 	def login(self):
 		user = users.get_current_user()
@@ -92,19 +95,11 @@ class Core():
 				session['firstname'] = row[0][1]
 				session['lastname'] = row[0][2]
 				session['is_login'] = 1
-				
-				# self.response.write(str(core.university_id) + " \n")
-				# self.response.write(core.email + " \n")
-				# self.response.write(core.domain + " \n")
-				# self.response.write(str(core.staff_id) + " \n")
-				# self.response.write(core.firstname + " \n")
-				# self.response.write(core.lastname + " \n")
 				self.redirect('/')
-			#self.response.write("Email: " + email)
-			#self.response.write("Domain: " + domain)
-			#self.response.write("Uni ID: " + str(session['university_id']))
 
 class Logout(webapp2.RequestHandler):
+	# This function is exectued when the user requests with method POST
+        # Terminate session before logging out	
 	@decorator.oauth_required
 	def post(self):
 		Core.IS_LOGIN = 0
@@ -116,6 +111,9 @@ class Logout(webapp2.RequestHandler):
 		Core.LASTNAME = ""
 		get_current_session().terminate()
 		self.redirect(users.create_logout_url(self.request.uri))
+
+	# This function is executed when the user requests with method GET
+        # Terminate session before logging out		
 	def get(self):
 		Core.IS_LOGIN = 0
 		Core.UNIVERSITY_ID = -1
@@ -129,6 +127,8 @@ class Logout(webapp2.RequestHandler):
 
 class MainHandler(webapp2.RequestHandler):
 
+	# This function is to retrieve course information from the 
+        # database and display course information in the table	
 	@decorator.oauth_required
 	def get(self):
 
@@ -157,35 +157,6 @@ class MainHandler(webapp2.RequestHandler):
 
 		template = JINJA_ENVIRONMENT.get_template('course.html')
 		self.response.write(template.render(templates))
-
-class Toggle(webapp2.RequestHandler):
-	def get(self):
-
-		value=self.request.get('course_id');
-		value=int(value)	
-
-		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-    		cursor = conn.cursor()
-    		sql1="SELECT status FROM regiscourse WHERE course_id= '%d'"%value
-    		cursor.execute(sql1);
-    		result=cursor.fetchall()
-
-    		for row in result:
-			if row[0]==1:
-				sql2="UPDATE regiscourse set status=0 where course_id='%d'"%value
-
-				cursor.execute(sql2);
-				
-
-			else:
-				sql3="UPDATE regiscourse set status=1 where course_id='%d'"%value
-				cursor.execute(sql3);
-
-				
-		conn.commit()
-		conn.close()
-		self.redirect("/")
-
 
 class search(webapp2.RequestHandler):
   	def post(self):
@@ -329,8 +300,7 @@ class search(webapp2.RequestHandler):
 		conn.close()
 		conn2.close()
 
-# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+# Display form create course page
 class CreateHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def get(self):
@@ -359,8 +329,10 @@ class CreateHandler(webapp2.RequestHandler):
     		get_template = JINJA_ENVIRONMENT.get_template('course_create.html')
     		self.response.write(get_template.render(templates));
 
-    	
-
+# Handle create course from create page
+# Insert data to database
+# Create Google+ circle
+# Create Mailing Group
 class InsertHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def post(self):
@@ -424,7 +396,7 @@ class InsertHandler(webapp2.RequestHandler):
 			result = service_plus.circles().insert(userId="me",body=params).execute(http=http)
                         
                         cursor.execute("insert into course \
-                        	   (course_code,course_name,course_description,credit_lecture,credit_lab,credit_learning,price,department,faculty,faculty_id, university_id, circle_id) VALUES ('%s','%s','%s','%d','%d','%d','%s','%s','%s','%d', '%s', '%s')"%(data_code,data_course_name,data_course_description,data_credit_lecture,data_credit_lab,data_credit_learning,price,data_department,data_faculty,data_faculty_id, str(session['university_id']), str(result['id'])))
+                        	   (course_code,course_name,course_description,credit_lecture,credit_lab,credit_learning,price,department,faculty,faculty_id, university_id, circle_id, circle_url) VALUES ('%s','%s','%s','%d','%d','%d','%s','%s','%s','%d', '%s', '%s')"%(data_code,data_course_name,data_course_description,data_credit_lecture,data_credit_lab,data_credit_learning,price,data_department,data_faculty,data_faculty_id, str(session['university_id']), str(result['id']), str(result['selfLink'])))
                         conn.commit()
 
 			params = {
@@ -481,7 +453,7 @@ class ErrorDelHandler(webapp2.RequestHandler):
 
 # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+# Display all activities log
 class Notification(webapp2.RequestHandler):
     	@decorator.oauth_required
 	def get(self):
@@ -511,7 +483,8 @@ class Notification(webapp2.RequestHandler):
   	
     		
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
+# Display course detail page
 class DetailCourseHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def get(self):
@@ -522,7 +495,6 @@ class DetailCourseHandler(webapp2.RequestHandler):
 
         	course_id = self.request.get('course_code');
         	capacity=""
-        	# course_id = "BIS-101"
 
         	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
         	cursor = conn.cursor()
@@ -569,6 +541,7 @@ class DetailCourseHandler(webapp2.RequestHandler):
             	conn.close();
             	conn2.close();
 
+# Display modify course page
 class ModifyCourseHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def get(self):
@@ -598,7 +571,7 @@ class ModifyCourseHandler(webapp2.RequestHandler):
 
             	conn3 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
             	cursor3 = conn3.cursor()
-            	sql3="SELECT section_id,section_number,UPPER(CONCAT(CONCAT(firstname,' '),lastname)),enroll,capacity\
+            	sql3="SELECT section_id,section_number,UPPER(CONCAT(CONCAT(firstname,' '),lastname)), circle_url,enroll,capacity\
                 	FROM section sec JOIN staff st ON teacher_id=staff_id\
                 	WHERE regiscourse_id=(SELECT regiscourse_id FROM regiscourse WHERE course_id=\
                 	(SELECT course_id from course where course_code='%s')) ORDER BY section_number"%(course_id)
@@ -644,7 +617,7 @@ class ModifyCourseHandler(webapp2.RequestHandler):
             	conn3.close();
             	conn4.close();
 
-
+# Update course data from modify page
 class UpdateCourseHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def post(self):
@@ -727,6 +700,7 @@ class UpdateCourseHandler(webapp2.RequestHandler):
 
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+# Display add section form page
 class AddSectionHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def get(self):
@@ -750,6 +724,10 @@ class AddSectionHandler(webapp2.RequestHandler):
                 conn.commit();
                 conn.close();        
 
+# Create section from add section page
+# Insert to database
+# Create Google+ circle
+# Create Mailing Group
 class InsSectionHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def post(self):
@@ -766,11 +744,16 @@ class InsSectionHandler(webapp2.RequestHandler):
                 capacity=self.request.get('capacity');
                 capacity=int(capacity)
 
+		params = {
+			'displayName' : "prinya-course-" + course_id + "-" + str(section_number)
+		}
+		result = service_plus.circles().insert(userId="me",body=params).execute(http=http)
+
                 conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                 cursor = conn.cursor()
-                sql="INSERT INTO section (regiscourse_id,section_number,teacher_id,capacity,enroll) \
+                sql="INSERT INTO section (regiscourse_id,section_number,teacher_id,capacity,enroll, circle_id, circle_url) \
                     	VALUES ((SELECT regiscourse_id FROM regiscourse WHERE course_id=(SELECT course_id FROM course where course_code = '%s')),'%d',\
-                    	(SELECT staff_id FROM staff WHERE type=2 AND firstname='%s' AND university_id='%s'),'%d','0')"%(course_id,section_number,teacher,session['university_id'],capacity)
+                    	(SELECT staff_id FROM staff WHERE type=2 AND firstname='%s' AND university_id='%s'),'%d','0', '%s', '%s')"%(course_id,section_number,teacher,session['university_id'],capacity, str(result['id']), str(result['selfLink']))
                 cursor.execute(sql);
                 conn.commit();
                 conn.close();
@@ -801,6 +784,7 @@ class InsSectionHandler(webapp2.RequestHandler):
 
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+# Display section detail page
 class DetailSectionHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def get(self):
@@ -850,6 +834,7 @@ class DetailSectionHandler(webapp2.RequestHandler):
                 conn.close();
                 conn2.close();
 
+# Display form modify section page
 class ModifySectionHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def post(self):
@@ -910,25 +895,10 @@ class ModifySectionHandler(webapp2.RequestHandler):
                 self.response.write(get_template.render(templates));
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+# Display form create section time page
 class AddSectimeHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def get(self):
-		# user = users.get_current_user()
-  #   		if not user:
-  #       		self.redirect(users.create_login_url(self.request.uri))
-		# else:
-		# 	email = user.email()
-		# 	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		# 	cursor = conn.cursor()
-		# 	cursor.execute("SELECT * FROM (SELECT student.email as stuemail, staff.email as semail FROM student LEFT JOIN staff ON student.student_id IS NULL UNION SELECT student.email as stuemail, staff.email as semail FROM student RIGHT JOIN staff ON student.student_id IS NULL) as Email WHERE stuemail='" + email +"' OR semail='" + email +"' LIMIT 1")
-		# 	row = cursor.fetchall()
-		# 	if len(row)==0:
-		# 		self.redirect('/InvalidLogin')
-		# 	else:
-		# 		if row[0][0] is None:
-		# 			user_type = "Staff"
-		# 		else:
-		# 			user_type = "Student"
 
 		Core.login(self)
 
@@ -949,25 +919,10 @@ class AddSectimeHandler(webapp2.RequestHandler):
                 get_template = JINJA_ENVIRONMENT.get_template('section_time.html')
                 self.response.write(get_template.render(templates));
 
+# Insert section time data from create section time page
 class InsSectimeHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def post(self):
-	 #    	user = users.get_current_user()
-  #   		if not user:
-  #       		self.redirect(users.create_login_url(self.request.uri))
-		# else:
-		# 	email = user.email()
-		# 	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		# 	cursor = conn.cursor()
-		# 	cursor.execute("SELECT * FROM (SELECT student.email as stuemail, staff.email as semail FROM student LEFT JOIN staff ON student.student_id IS NULL UNION SELECT student.email as stuemail, staff.email as semail FROM student RIGHT JOIN staff ON student.student_id IS NULL) as Email WHERE stuemail='" + email +"' OR semail='" + email +"' LIMIT 1")
-		# 	row = cursor.fetchall()
-		# 	if len(row)==0:
-		# 		self.redirect('/InvalidLogin')
-		# 	else:
-		# 		if row[0][0] is None:
-		# 			user_type = "Staff"
-		# 		else:
-		# 			user_type = "Student"
 
 		Core.login(self)
 
@@ -1011,25 +966,12 @@ class InsSectimeHandler(webapp2.RequestHandler):
 
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+# Delete course from database
+# Delete Google+ circle
+# Delete Mailing Group
 class DeleteCourseHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def get(self):
-		# user = users.get_current_user()
-  #   		if not user:
-  #       		self.redirect(users.create_login_url(self.request.uri))
-		# else:
-		# 	email = user.email()
-		# 	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		# 	cursor = conn.cursor()
-		# 	cursor.execute("SELECT * FROM (SELECT student.email as stuemail, staff.email as semail FROM student LEFT JOIN staff ON student.student_id IS NULL UNION SELECT student.email as stuemail, staff.email as semail FROM student RIGHT JOIN staff ON student.student_id IS NULL) as Email WHERE stuemail='" + email +"' OR semail='" + email +"' LIMIT 1")
-		# 	row = cursor.fetchall()
-		# 	if len(row)==0:
-		# 		self.redirect('/InvalidLogin')
-		# 	else:
-		# 		if row[0][0] is None:
-		# 			user_type = "Staff"
-		# 		else:
-		# 			user_type = "Student"
 
 		Core.login(self)
 
@@ -1046,6 +988,7 @@ class DeleteCourseHandler(webapp2.RequestHandler):
 		sql="SELECT circle_id FROM course WHERE course_code='%s' AND university_id='%s'"%(course_id, str(session['university_id']))
 		cursor.execute(sql)
 		allrow = cursor.fetchall()
+		circle_id = allrow[0][0]
     	        sql="DELETE FROM course WHERE course_code='%s' AND university_id='%s'"%(course_id, str(session['university_id']))
     	        cursor.execute(sql);
     	        conn.commit();
@@ -1069,7 +1012,9 @@ class DeleteCourseHandler(webapp2.RequestHandler):
 
     	        self.redirect("/");        
 
-
+# Delete section from database
+# Delete Google+ circle
+# Delete Mailing Group
 class DeleteSectionHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
    	def get(self):
@@ -1104,12 +1049,18 @@ class DeleteSectionHandler(webapp2.RequestHandler):
                 section_id=self.request.get('section_id')
                 section_id=int(section_id)
 
+		sql = "SELECT circle_id FROM section WHERE section_id='%d'"%(section_id)
+		cursor.execute(sql)
+		row = cursor.fetchall()
+		circle_id = row[0][0]
+
                 sql="DELETE FROM section WHERE section_id='%d'"%(section_id)
                 cursor.execute(sql);
                 conn.commit();
 
 		email = "prinya-course-" + course_id + "-" + section_number + session['domain']
     		result = service.groups().delete(groupKey=email).execute(http=http)
+		result = service_plus.circles().remove(circleId=circle_id).execute(http=http)
 
                 utc = pytz.utc
                 date_object = datetime.today()
@@ -1126,26 +1077,10 @@ class DeleteSectionHandler(webapp2.RequestHandler):
 
                 self.redirect("/ModifyCourse?course_id="+course_id)        
 
+# Delete section time
 class DeleteSectimeHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def get(self):
-  #       	user = users.get_current_user()
-  #   		if not user:
-  #       		self.redirect(users.create_login_url(self.request.uri))
-		# else:
-		# 	email = user.email()
-		# 	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		# 	cursor = conn.cursor()
-		# 	cursor.execute("SELECT * FROM (SELECT student.email as stuemail, staff.email as semail FROM student LEFT JOIN staff ON student.student_id IS NULL UNION SELECT student.email as stuemail, staff.email as semail FROM student RIGHT JOIN staff ON student.student_id IS NULL) as Email WHERE stuemail='" + email +"' OR semail='" + email +"' LIMIT 1")
-		# 	row = cursor.fetchall()
-		# 	if len(row)==0:
-		# 		self.redirect('/InvalidLogin')
-		# 	else:
-		# 		if row[0][0] is None:
-		# 			user_type = "Staff"
-		# 		else:
-		# 			user_type = "Student"
-
 		Core.login(self)
 
 		session = get_current_session()
@@ -1182,10 +1117,12 @@ class DeleteSectimeHandler(webapp2.RequestHandler):
 
                 self.redirect("/ModifySection?course_id="+course_id+"&section_id="+str(section_id)+"&section_number="+str(section_number));
 
+# Display invalid login message
 class InvalidLogin(webapp2.RequestHandler):
 	def get(self):
 		self.response.write("Invalid Login")
 
+# Query keyword and render html result
 class AjaxSearch(webapp2.RequestHandler):
 	def post(self):
 		session = get_current_session()
@@ -1213,25 +1150,10 @@ class AjaxSearch(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('course_ajax.html')
 		self.response.write(template.render(templates))
 
+# Manage user page
 class ManageUser(webapp2.RequestHandler):
 	@decorator.oauth_required
 	def get(self):
-		# user = users.get_current_user()
-  #       	if not user:
-  #           		self.redirect(users.create_login_url(self.request.uri))
-		# else:
-		# 	email = user.email()
-		# 	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-  #   			cursor = conn.cursor()
-		# 	cursor.execute("SELECT * FROM (SELECT student.email as stuemail, staff.email as semail FROM student LEFT JOIN staff ON student.student_id IS NULL UNION SELECT student.email as stuemail, staff.email as semail FROM student RIGHT JOIN staff ON student.student_id IS NULL) as Email WHERE stuemail='" + email +"' OR semail='" + email +"' LIMIT 1")
-		# 	row = cursor.fetchall()
-		# 	if len(row)==0:
-		# 		self.redirect('/InvalidLogin')
-		# 	else:
-		# 		if row[0][0] is None:
-		# 			user_type = "Staff"
-		# 		else:
-		# 			user_type = "Student"
 
 		Core.login(self)
 
@@ -1265,6 +1187,7 @@ class ManageUser(webapp2.RequestHandler):
 		#self.response.out.write('<select name="stype"><option value="student">Student</option><option value="staff">Staff</option><select><br>')
 		#self.response.out.write("""Upload File: <input type="file" name="file"><br> <input type="submit" name="submit" value="Submit"> </form></body></html>""")		
 
+# Delete user
 class UserDelete(webapp2.RequestHandler):
 	def post(self):
 		user_id = self.request.get('user_id')
@@ -1280,6 +1203,7 @@ class UserDelete(webapp2.RequestHandler):
 		conn.close()
 		self.redirect('/ManageUser')
 
+# Upload CSV file
 class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
 	def post(self):
 		session = get_current_session()
@@ -1312,25 +1236,10 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         	conn.close();
 		self.response.out.write("Import User Successfully")
 
+# Display manage credit page
 class Credit(webapp2.RequestHandler):
 	@decorator.oauth_required
 	def get(self):
-		# user = users.get_current_user()
-  #   		if not user:
-  #       		self.redirect(users.create_login_url(self.request.uri))
-		# else:
-		# 	email = user.email()
-		# 	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		# 	cursor = conn.cursor()
-		# 	cursor.execute("SELECT * FROM (SELECT student.email as stuemail, staff.email as semail FROM student LEFT JOIN staff ON student.student_id IS NULL UNION SELECT student.email as stuemail, staff.email as semail FROM student RIGHT JOIN staff ON student.student_id IS NULL) as Email WHERE stuemail='" + email +"' OR semail='" + email +"' LIMIT 1")
-		# 	row = cursor.fetchall()
-		# 	if len(row)==0:
-		# 		self.redirect('/InvalidLogin')
-		# 	else:
-		# 		if row[0][0] is None:
-		# 			user_type = "Staff"
-		# 		else:
-		# 			user_type = "Student"
 
 		Core.login(self)
 
@@ -1351,6 +1260,7 @@ class Credit(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('credit.html')
 		self.response.write(template.render(templates))
 
+# Update credit data from manage credit page
 class CreditHandler(webapp2.RequestHandler):
 	def post(self):
 		pay_type = self.request.get('rate')
@@ -1378,6 +1288,7 @@ class CreditHandler(webapp2.RequestHandler):
 		conn.close()
 		self.redirect('/')
 
+# Display manage faculty page
 class ManageFaculty(webapp2.RequestHandler):
 	@decorator.oauth_required
 	def post(self):
@@ -1430,6 +1341,7 @@ class ManageFaculty(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('addfaculty.html')
 		self.response.write(template.render(templates))
 
+# Modify university page
 class ManageUniversity(webapp2.RequestHandler):
 	@decorator.oauth_required
 	def get(self):
@@ -1449,6 +1361,7 @@ class ManageUniversity(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('manage_university.html')
 		self.response.write(template.render(templates))	
 
+# Modify faculty from manage university page
 class ManageUniversityHandler(webapp2.RequestHandler):
 	@decorator.oauth_required
 	def post(self):
@@ -1477,6 +1390,7 @@ class ManageUniversityHandler(webapp2.RequestHandler):
 		conn.close()
 		self.redirect('/ManageUniversity')
 
+# Check course registration last date
 class UpdateSectionEveryDay(webapp2.RequestHandler):
 	def get(self):
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
@@ -1505,7 +1419,6 @@ class UpdateSectionEveryDay(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
 	('/', MainHandler),
-	('/toggle',Toggle),
 	('/search',search),
 	('/Create', CreateHandler),
 	('/Insert', InsertHandler),
