@@ -390,13 +390,15 @@ class InsertHandler(webapp2.RequestHandler):
 
 			price = self.request.get('price')
 
+			display_name = "prinya-course-" + data_code
 			params = {
-				'displayName' : "prinya-course-" + data_code
+				'displayName' : display_name
 			}
 			result = service_plus.circles().insert(userId="me",body=params).execute(http=http)
+			circle_url = "https://plus.google.com/u/0/circles/" + display_name + "-p" + result['id']
                         
                         cursor.execute("insert into course \
-                        	   (course_code,course_name,course_description,credit_lecture,credit_lab,credit_learning,price,department,faculty,faculty_id, university_id, circle_id, circle_url) VALUES ('%s','%s','%s','%d','%d','%d','%s','%s','%s','%d', '%s', '%s')"%(data_code,data_course_name,data_course_description,data_credit_lecture,data_credit_lab,data_credit_learning,price,data_department,data_faculty,data_faculty_id, str(session['university_id']), str(result['id']), str(result['selfLink'])))
+                        	   (course_code,course_name,course_description,credit_lecture,credit_lab,credit_learning,price,department,faculty,faculty_id, university_id, circle_id, circle_url) VALUES ('%s','%s','%s','%d','%d','%d','%s','%s','%s','%d', '%s', '%s', '%s')"%(data_code,data_course_name,data_course_description,data_credit_lecture,data_credit_lab,data_credit_learning,price,data_department,data_faculty,data_faculty_id, str(session['university_id']), str(result['id']), circle_url))
                         conn.commit()
 
 			params = {
@@ -744,16 +746,18 @@ class InsSectionHandler(webapp2.RequestHandler):
                 capacity=self.request.get('capacity');
                 capacity=int(capacity)
 
+		display_name = "prinya-course-" + course_id + "-" + str(section_number)
 		params = {
-			'displayName' : "prinya-course-" + course_id + "-" + str(section_number)
+			'displayName' : display_name
 		}
 		result = service_plus.circles().insert(userId="me",body=params).execute(http=http)
+		circle_url = "https://plus.google.com/u/0/circles/" + display_name + "-" + result['id']
 
                 conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                 cursor = conn.cursor()
                 sql="INSERT INTO section (regiscourse_id,section_number,teacher_id,capacity,enroll, circle_id, circle_url) \
                     	VALUES ((SELECT regiscourse_id FROM regiscourse WHERE course_id=(SELECT course_id FROM course where course_code = '%s')),'%d',\
-                    	(SELECT staff_id FROM staff WHERE type=2 AND firstname='%s' AND university_id='%s'),'%d','0', '%s', '%s')"%(course_id,section_number,teacher,session['university_id'],capacity, str(result['id']), str(result['selfLink']))
+                    	(SELECT staff_id FROM staff WHERE type=2 AND firstname='%s' AND university_id='%s'),'%d','0', '%s', '%s')"%(course_id,section_number,teacher,session['university_id'],capacity, str(result['id']), circle_url)
                 cursor.execute(sql);
                 conn.commit();
                 conn.close();
