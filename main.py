@@ -23,6 +23,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.runtime import DeadlineExceededError
 from gaesessions import get_current_session
 from gaesessions import SessionMiddleware
 from google.appengine.api import urlfetch
@@ -648,7 +649,7 @@ class ModifyCourseHandler(webapp2.RequestHandler):
 
             	conn3 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
             	cursor3 = conn3.cursor()
-            	sql3="SELECT section_id,section_number,UPPER(CONCAT(CONCAT(firstname,' '),lastname)), circle_url,enroll,capacity\
+            	sql3="SELECT section_id,section_number,UPPER(CONCAT(CONCAT(firstname,' '),lastname)), circle_url, site_url,enroll,capacity\
                 	FROM section sec JOIN staff st ON teacher_id=staff_id\
                 	WHERE regiscourse_id=(SELECT regiscourse_id FROM regiscourse WHERE course_id=\
                 	(SELECT course_id from course where course_code='%s')) ORDER BY section_number"%(course_id)
@@ -676,6 +677,7 @@ class ModifyCourseHandler(webapp2.RequestHandler):
                 	'course2' : cursor2.fetchall(),
                		'course3' : cursor3.fetchall(),
                 	'course_id' : course_id,
+			'course_name' : course_name,
                 	'prerequisite_id' : pre_id,
                 	'prerequisite_code' : pre_code,
 			'faculty' : faculty,
@@ -840,7 +842,7 @@ class InsSectionHandler(webapp2.RequestHandler):
                 conn2.close();
 
                 #self.redirect("/ModifyCourse?course_id="+course_id)
-		self.redirect("/CreateSecSites?course_id="+course_id+"&section_number="+section_number_str+"&course_name="+course_name+"&teacher="+teacher)
+		self.redirect("/CreateSecSites?course_id="+course_id+"&section_number="+str(section_number)+"&course_name="+course_name+"&teacher="+teacher)
 
 class CreateSecSitesHandler(webapp2.RequestHandler):
 	@decorator.oauth_required
@@ -855,13 +857,13 @@ class CreateSecSitesHandler(webapp2.RequestHandler):
 		teacher = self.request.get('teacher')
 		
 		templates = {
-				'email' : session['email'],
-				'course_id' : data_code,
-				'course_name' : course_name,
-				'section_number' : section_number,
-				'domain' : session['domain'].replace("@",""),
-				'teacher' : teacher,
-				}
+			'email' : session['email'],
+			'course_id' : data_code,
+			'course_name' : course_name,
+			'section_number' : section_number,
+			'domain' : session['domain'].replace("@",""),
+			'teacher' : teacher,
+		}
 		get_template = JINJA_ENVIRONMENT.get_template('sec_site_create.html')
 		self.response.write(get_template.render(templates))
 

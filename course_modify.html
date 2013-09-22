@@ -232,15 +232,16 @@
   <tr>
     <td align="right"><table width="900" border="0" align="center" cellpadding="5" cellspacing="0">
       <tr bgcolor="#FFC200" class="font1">
-        <td width="30" align="center" bgcolor="#FFFF66">NO</td>
+        <td align="center" bgcolor="#FFFF66">NO</td>
         <td align="center" bgcolor="#FFFF66">Professor</td>
         <td align="center" bgcolor="#FFFF66">Mail Group</td>
         <td align="center" bgcolor="#FFFF66">Circle URL</td>
-        <td width="80" align="center" bgcolor="#FFFF66">Enrolled</td>
-        <td width="80" align="center" bgcolor="#FFFF66">Capacity</td>
-        <td width="50" align="center" bgcolor="#FFFF66">Status</td>
-        <td width="50" align="center" bgcolor="#FFFF66">&nbsp;</td>
-        <td width="50" align="center" bgcolor="#FFFF66">&nbsp;</td>
+        <td align="center" bgcolor="#FFFF66">Sites URL</td>
+        <td align="center" bgcolor="#FFFF66">Enrolled</td>
+        <td align="center" bgcolor="#FFFF66">Capacity</td>
+        <td align="center" bgcolor="#FFFF66">Status</td>
+        <td align="center" bgcolor="#FFFF66">&nbsp;</td>
+        <td align="center" bgcolor="#FFFF66">&nbsp;</td>
       </tr>
       {% for row in course3 %}
       <tr>
@@ -248,8 +249,9 @@
         <td align="center" bgcolor="#FFFFCC">{{ row[2] }}</td>
         <td align="center" bgcolor="#FFFFCC">prinya-course-{{ course_id }}-{{ row[1] }}{{ domain }}</td>
         <td align="left" bgcolor="#FFFFCC"><a href="{{ row[3] }}">{{ row[3] }}</a></td>
-        <td align="center" bgcolor="#FFFFCC">{{ row[4] }}</td>
+        <td align="left" bgcolor="#FFFFCC"><a href="{{ row[4] }}">{{ row[4] }}</a></td>
         <td align="center" bgcolor="#FFFFCC">{{ row[5] }}</td>
+        <td align="center" bgcolor="#FFFFCC">{{ row[6] }}</td>
         <td align="center" bgcolor="#FFFFCC">Active</td>
         <td align="center" bgcolor="#FFFFCC"><a href="/DetailSection?course_id={{ course_id }}&section_number={{ row[1] }}&section_id={{ row[0] }}">Detail</a></td>
         <td align="center" bgcolor="#FFFFCC"><a href="/DeleteSection?course_id={{ course_id }}&section_number={{ row[1] }}&type_log=1&section_id={{ row[0] }}">Delete</a></td>
@@ -263,7 +265,7 @@
       <tr class="font2">
         <td align="left">
         {% for row in course %}
-          <a href="/AddSection?course_id={{ row[1] }}"><input style="width:200px; height:40;" type="button" value="Add Section" /></a>
+          <a href="/AddSection?course_id={{ row[1] }}&course_name={{ course_name }}"><input style="width:200px; height:40;" type="button" value="Add Section" /></a>
         </td>
         <td width="150" align="center">
         <input style="width:140px; height:40px;" type="submit" value="Save" onclick="return cfmModify()" />

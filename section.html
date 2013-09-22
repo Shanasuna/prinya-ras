@@ -45,9 +45,10 @@
           <tr>
             <td colspan="2" align="center"><label>
               <input type="hidden" id="course_id" name="course_id" value="{{ course_id }}"/>
+              <input type="hidden" id="course_name" name="course_name" value="{{ course_name }}"/>
               <input type="submit" name="submit" id="submit" value="Add Section" onclick="return confirm('Click OK to confirm')" />
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <a href="/ModifyCourse?course_id={{ course_id }}"><input type="button" name="reset" id="reset" value="Back" /></a>
+              <a href="/ModifyCourse?course_id={{ course_id }}&course_name={{ course_name }}"><input type="button" name="reset" id="reset" value="Back" /></a>
             </label></td>
           </tr>
         </table>

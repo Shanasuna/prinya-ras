@@ -25,34 +25,34 @@
 
       <tr>
         <td width="150" align="right">Course Code ::</td>
-        <td width="300" align="left">{{ row[1] }}</td>
+        <td align="left">{{ row[1] }}</td>
         <td align="right">Total ::</td>
         <td align="left"></td>
         </tr>
       <tr>
         <td width="150" align="right">Course Name ::</td>
-        <td width="300" align="left">{{ row[2] }}</td>
+        <td align="left">{{ row[2] }}</td>
         <td align="right">Capacity ::</td>
         <td align="left">{{ capacity }}</td>
       </tr>
       <tr>
         <td width="150" align="right">Prerequisite ::</td>
         <td align="left">{{ prerequisite_code }}</td>
-        <td width="150" align="right">Mailing Group ::</td>
+        <td align="right">Mailing Group ::</td>
         <td align="left">prinya-course-{{ row[1] }}{{ domain }}</td>
       </tr>
       
       <tr>
         <td width="150" align="right">Faculty ::</td>
-        <td width="300" align="left">{{ row[11] }}</td>
-        <td width="150" align="right">Circle URL ::</td>
+        <td align="left">{{ row[11] }}</td>
+        <td align="right">Circle URL ::</td>
         <td align="left"><a href="{{ row[15] }}">{{ row[15] }}</a></td>
       </tr>
       <tr>
         <td width="150" align="right">Department ::</td>
         <td width="300" align="left">{{ row[10] }}</td>
-        <td width="150" align="right">&nbsp;</td>
-        <td width="120" align="left">&nbsp;</td>
+        <td align="right">Sites URL ::</td>
+        <td align="left"><a href="{{ row[16] }}">{{ row[16] }}</a></td>
       </tr>
       <tr>
         <td width="150" align="right">Course Description ::</td>
@@ -120,7 +120,7 @@
       <tr>
         <td width="150">
         {% for row in course %}
-          <a href="/ModifyCourse?course_id={{ row[1] }}">
+          <a href="/ModifyCourse?course_id={{ row[1] }}&course_name={{ row[2] }}">
           <input style="width:140px; height:40px;" type="button" value="Modify" /></a>
         {% endfor %}
         
