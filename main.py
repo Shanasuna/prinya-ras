@@ -474,32 +474,38 @@ class InsertSitesHandler(webapp2.RequestHandler):
 		data_course_name = self.request.get('course_name')
 		data_code = self.request.get('course_id')
 		
-		client = gdata.sites.client.SitesClient(source=SOURCE_APP_NAME)
-		client.ClientLogin(site_username, site_password, client.source)
-		client.domain = session['domain'].replace("@","")
+		try:
+			client = gdata.sites.client.SitesClient(source=SOURCE_APP_NAME)
+			client.ClientLogin(site_username, site_password, client.source)
+			client.domain = session['domain'].replace("@","")
 		
-		site_name = data_course_name + "-1-2556"
+			site_name = data_course_name + "-1-2556"
 										   
-		entry = client.CreateSite(site_name, description='Testing of Prinya course site', theme='slate')
-		site_url = entry.GetAlternateLink().href
+			entry = client.CreateSite(site_name, description='Testing of Prinya course site', theme='slate')
+			site_url = entry.GetAlternateLink().href
 		
-		site_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		site_cursor = site_conn.cursor()
-		site_cursor.execute("UPDATE course SET site_url = '%s' WHERE course_code = '%s'"%(site_url, data_code))
-		site_conn.commit()
-		"""
-		student_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		student_cursor = student_conn.cursor()
-		student_cursor.execute("SELECT student_id FROM registeredcourse WHERE regiscourse_id = '%s'"%(data_code))
-		student_fetch = student_cursor.fetchall()
+			site_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+			site_cursor = site_conn.cursor()
+			site_cursor.execute("UPDATE course SET site_url = '%s' WHERE course_code = '%s'"%(site_url, data_code))
+			site_conn.commit()
+			"""
+			student_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+			student_cursor = student_conn.cursor()
+			student_cursor.execute("SELECT student_id FROM registeredcourse WHERE regiscourse_id = '%s'"%(data_code))
+			student_fetch = student_cursor.fetchall()
 		
-		scope = gdata.acl.data.AclScope(value='email', type='user')
-		role = gdata.acl.data.AclRole(value='reader')
-		acl = gdata.sites.data.AclEntry(scope=scope, role=role)
-		"""
+			scope = gdata.acl.data.AclScope(value='email', type='user')
+			role = gdata.acl.data.AclRole(value='reader')
+			acl = gdata.sites.data.AclEntry(scope=scope, role=role)
+			"""
 		
-		site_conn.close()
-		self.redirect("/ModifyCourse?course_id="+data_code+"&course_name="+data_course_name)
+			site_conn.close()
+			self.redirect("/ModifyCourse?course_id="+data_code+"&course_name="+data_course_name)
+		except DeadlineExceededError:
+			self.response.clear()
+            		self.response.headers['Location'] = response.geturl()
+            		self.response.set_status(302)
+
 
 class ErrorHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
@@ -872,39 +878,46 @@ class InsertSecSitesHandler(webapp2.RequestHandler):
 		section_number = self.request.get('section_number')
 		course_name = self.request.get('course_name')
 		teacher_name = self.request.get('teacher_name')
+
+		try:
+			teach_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+			teach_cursor = teach_conn.cursor()
+			teach_cursor.execute("SELECT email FROM staff WHERE firstname = '%s'"%(teacher_name))
+			teach_fetch = teach_cursor.fetchall()
 		
-		teach_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		teach_cursor = teach_conn.cursor()
-		teach_cursor.execute("SELECT email FROM staff WHERE firstname = '%s'"%(teacher_name))
-		teach_fetch = teach_cursor.fetchall()
+			teacher_email = teach_fetch[0]
 		
-		teacher_email = teach_fetch[0]
+			site_name = course_name+"-1-2556"
 		
-		site_name = course_name+"-1-2556"
+			client = gdata.sites.client.SitesClient(source=SOURCE_APP_NAME, site = site_name)
+			client.ClientLogin(site_sec_username, site_sec_password, client.source)
+			client.domain = session['domain'].replace("@","")
 		
-		client = gdata.sites.client.SitesClient(source=SOURCE_APP_NAME, site = site_name)
-		client.ClientLogin(site_sec_username, site_sec_password, client.source)
-		client.domain = session['domain'].replace("@","")
-		
-		site_sec_name = course_name + "-sec" + section_number + "-1-2556"
+			site_sec_name = course_name + "-sec" + section_number + "-1-2556"
 										   
-		entry = client.CreateSite(site_sec_name, description='Testing of Prinya course site', theme='slate')
-		site_sec_url = entry.GetAlternateLink().href
-		"""
-		scope = gdata.acl.data.AclScope(value=teacher_email, type='user')
-		role = gdata.acl.data.AclRole(value='writer')
-		acl = gdata.sites.data.AclEntry(scope=scope, role=role)
+			entry = client.CreateSite(site_sec_name, description='Testing of Prinya course site', theme='slate')
+			site_sec_url = entry.GetAlternateLink().href
+			"""
+			scope = gdata.acl.data.AclScope(value=teacher_email, type='user')
+			role = gdata.acl.data.AclRole(value='writer')
+			acl = gdata.sites.data.AclEntry(scope=scope, role=role)
 		
-		acl_entry = client.Post(acl, client.MakeAclFeedUri())
-		"""
-		site_sec_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		site_sec_cursor = site_sec_conn.cursor()
-		site_sec_cursor.execute("UPDATE section SET site_url = '%s' WHERE regiscourse_id = \
-			(SELECT regiscourse_id FROM regiscourse WHERE course_id = \
-			(SELECT course_id FROM course WHERE course_code = '%s')) AND section_number = '%d'"%(site_sec_url, data_code, int(section_number)))
-		site_sec_conn.commit()
+			acl_entry = client.Post(acl, client.MakeAclFeedUri())
+			"""
+			site_sec_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+			site_sec_cursor = site_sec_conn.cursor()
+			site_sec_cursor.execute("UPDATE section SET site_url = '%s' WHERE regiscourse_id = \
+				(SELECT regiscourse_id FROM regiscourse WHERE course_id = \
+				(SELECT course_id FROM course WHERE course_code = '%s')) AND section_number = '%d'"%(site_sec_url, data_code, int(section_number)))
+			site_sec_conn.commit()
 		
-		self.redirect("/ModifyCourse?course_id="+data_code+"&course_name="+course_name)
+			self.redirect("/ModifyCourse?course_id="+data_code+"&course_name="+course_name)
+
+		except DeadlineExceededError:
+			self.response.clear()
+            		self.response.headers['Location'] = response.geturl()
+            		self.response.set_status(302)
+
 
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
