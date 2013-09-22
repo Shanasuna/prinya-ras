@@ -10,7 +10,7 @@
 	<div align="right" style="margin-right: 20px">{{ email }}</div>
 	<br>
 	<form action="/InsertSecSites" method="post" enctype="multipart/form-data" onsubmit="" id="form_site">
-		<span style="text-align:center;">กรุณากรอกอีเมลและรหัสผ่านเพื่อสร้าง Site: {{ course_name }}-{{ section_number }}-1-2556</span>
+		<div style="text-align:center;">กรุณากรอกอีเมลและรหัสผ่านเพื่อสร้าง Site: {{ course_name }}-sec{{ section_number }}-1-2556@{{ domain }}</div>
 		<input type="hidden" name="section_number" id="section_number" value="{{ section_number }}">
 		<input type="hidden" name="course_id" id="course_id" value="{{ course_id }}">
 		<input type="hidden" name="course_name" id="course_name" value="{{ course_name }}">

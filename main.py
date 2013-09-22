@@ -33,6 +33,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     	extensions=['jinja2.ext.autoescape'])
 
 _INSTANCE_NAME="prinya-th-2013:prinya-db"
+SOURCE_APP_NAME = "jakkrit-sitesample-001"
 
 decorator = OAuth2Decorator(
 	client_id='635092385463.apps.googleusercontent.com',
@@ -487,6 +488,7 @@ class CreateSitesHandler(webapp2.RequestHandler):
 		
 		templates = {
 				'email' : session['email'],
+				'domain' : session['domain'].replace("@",""),
 				'course_name' : data_course_name,
 				'course_id' : data_code,
 				}
@@ -507,9 +509,10 @@ class InsertSitesHandler(webapp2.RequestHandler):
 		data_course_name = self.request.get('course_name')
 		data_code = self.request.get('course_id')
 		
-		client = gdata.sites.client.SitesClient(source='jakkrit-sitesample-001')
+		client = gdata.sites.client.SitesClient(source=SOURCE_APP_NAME)
 		client.ClientLogin(site_username, site_password, client.source)
-		client.domain = 'kkumail.com'
+		client.domain = session['domain'].replace("@","")
+		#client.domain = "kkumail.com"
 		
 		site_name = data_course_name + "-1-2556"
 										   
@@ -518,7 +521,7 @@ class InsertSitesHandler(webapp2.RequestHandler):
 		
 		site_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
 		site_cursor = site_conn.cursor()
-		site_cursor.execute("UPDATE course SET site_url = '%s' WHERE course_id = '%s'"%(site_url, data_code))
+		site_cursor.execute("UPDATE course SET site_url = '%s' WHERE course_code = '%s'"%(site_url, data_code))
 		site_conn.commit()
 		"""
 		student_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
@@ -676,7 +679,7 @@ class ModifyCourseHandler(webapp2.RequestHandler):
 
             	conn3 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
             	cursor3 = conn3.cursor()
-            	sql3="SELECT section_id,section_number,UPPER(CONCAT(CONCAT(firstname,' '),lastname)),enroll,capacity\
+            	sql3="SELECT section_id,section_number,UPPER(CONCAT(CONCAT(firstname,' '),lastname)),enroll,capacity, site_url\
                 	FROM section sec JOIN staff st ON teacher_id=staff_id\
                 	WHERE regiscourse_id=(SELECT regiscourse_id FROM regiscourse WHERE course_id=\
                 	(SELECT course_id from course where course_code='%s')) ORDER BY section_number"%(course_id)
@@ -890,6 +893,7 @@ class CreateSecSitesHandler(webapp2.RequestHandler):
 				'course_id' : data_code,
 				'course_name' : course_name,
 				'section_number' : section_number,
+				'domain' : session['domain'].replace("@",""),
 				'teacher' : teacher,
 				}
 		get_template = JINJA_ENVIRONMENT.get_template('sec_site_create.html')
@@ -918,20 +922,28 @@ class InsertSecSitesHandler(webapp2.RequestHandler):
 		
 		site_name = course_name+"-1-2556"
 		
-		client = gdata.sites.client.SitesClient(source='jakkrit-sitesample-001', site = site_name)
+		client = gdata.sites.client.SitesClient(source=SOURCE_APP_NAME, site = site_name)
 		client.ClientLogin(site_sec_username, site_sec_password, client.source)
-		client.domain = 'kkumail.com'
+		client.domain = session['domain'].replace("@","")
+		#client.domain = 'kkumail.com'
 		
 		site_sec_name = course_name + "-sec" + section_number + "-1-2556"
 										   
 		entry = client.CreateSite(site_sec_name, description='Testing of Prinya course site', theme='slate')
 		site_sec_url = entry.GetAlternateLink().href
-		
+		"""
 		scope = gdata.acl.data.AclScope(value=teacher_email, type='user')
 		role = gdata.acl.data.AclRole(value='writer')
 		acl = gdata.sites.data.AclEntry(scope=scope, role=role)
 		
 		acl_entry = client.Post(acl, client.MakeAclFeedUri())
+		"""
+		site_sec_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+		site_sec_cursor = site_sec_conn.cursor()
+		site_sec_cursor.execute("UPDATE section SET site_url = '%s' WHERE regiscourse_id = \
+			(SELECT regiscourse_id FROM regiscourse WHERE course_id = \
+			(SELECT course_id FROM course WHERE course_code = '%s')) AND section_number = '%d'"%(site_sec_url, data_code, int(section_number)))
+		site_sec_conn.commit()
 		
 		self.redirect("/ModifyCourse?course_id="+data_code+"&course_name="+course_name)
 

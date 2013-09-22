@@ -78,3 +78,20 @@ CREATE TABLE `student` (
   `faculty_id` int(6) DEFAULT NULL,
   PRIMARY KEY (`student_id`,`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `section` (
+  `section_id` int(6) NOT NULL AUTO_INCREMENT,
+  `regiscourse_id` int(6) NOT NULL,
+  `section_number` int(2) NOT NULL,
+  `teacher_id` int(6) NOT NULL,
+  `capacity` int(6) NOT NULL,
+  `enroll` int(3) NOT NULL,
+  `circle_id` varchar(250) DEFAULT NULL,
+  `circle_url` varchar(250) DEFAULT NULL,
+  `site_url` varchar(250) DEFAULT NULL,
+  PRIMARY KEY (`section_id`),
+  KEY `regiscourse_id_idx` (`regiscourse_id`),
+  KEY `teacher_id_idx` (`teacher_id`),
+  CONSTRAINT `regiscourse_id` FOREIGN KEY (`regiscourse_id`) REFERENCES `regiscourse` (`regiscourse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `section_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8;
