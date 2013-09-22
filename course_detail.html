@@ -120,7 +120,7 @@
       <tr>
         <td width="150">
         {% for row in course %}
-          <a href="/ModifyCourse?course_id={{ row[1] }}">
+          <a href="/ModifyCourse?course_id={{ row[1] }}&course_name={{ row[2] }}">
           <input style="width:140px; height:40px;" type="button" value="Modify" /></a>
         {% endfor %}
         

@@ -259,7 +259,7 @@
       <tr class="font2">
         <td align="left">
         {% for row in course %}
-          <a href="/AddSection?course_id={{ row[1] }}"><input style="width:200px; height:40;" type="button" value="Add Section" /></a>
+          <a href="/AddSection?course_id={{ row[1] }}&course_name={{ row[2] }}"><input style="width:200px; height:40;" type="button" value="Add Section" /></a>
         </td>
         <td width="150" align="center">
         <input style="width:140px; height:40px;" type="submit" value="Save" onclick="return cfmModify()" />

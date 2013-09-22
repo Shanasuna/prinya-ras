@@ -4,6 +4,12 @@ import webapp2
 import json
 import StringIO
 import csv
+"""
+import getopt
+import mimetypes
+import os.path
+import sys
+"""
 import atom.data
 import gdata.sample_util
 import gdata.sites.client
@@ -25,8 +31,6 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 from gaesessions import get_current_session
 from gaesessions import SessionMiddleware
-from google.appengine.api import urlfetch
-urlfetch.set_default_fetch_deadline(60)
 
 JINJA_ENVIRONMENT = jinja2.Environment(
 	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -60,7 +64,7 @@ class Core():
 	@staticmethod
 	def login(self):
 		user = users.get_current_user()
-		if not user:
+        	if not user:
 			Core.IS_LOGIN = 0
 			Core.UNIVERSITY_ID = -1
 			Core.DOMAIN = ""
@@ -68,7 +72,7 @@ class Core():
 			Core.STAFF_ID = ""
 			Core.FIRSTNAME = ""
 			Core.LASTNAME = ""
-			self.redirect(users.create_login_url(self.request.uri))
+            		self.redirect(users.create_login_url(self.request.uri))
 		else:
 			session = get_current_session()
 			if session.has_key('is_login'):
@@ -76,7 +80,7 @@ class Core():
 			email = user.email()
 			session['email'] = email
 			conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-			cursor = conn.cursor()
+    			cursor = conn.cursor()
 
 			domain = email[email.find('@'):len(email)]
 			session['domain'] = domain
@@ -152,7 +156,7 @@ class MainHandler(webapp2.RequestHandler):
 		course = cursor.fetchall()
 
 		cursor.execute('SELECT sum(capacity),sum(enroll),regiscourse_id FROM section group by regiscourse_id')
-		enroll = cursor.fetchall()
+        	enroll = cursor.fetchall()
 		cursor.execute("SELECT * FROM faculty WHERE university_id=" + str(session['university_id']))
 		faculty = cursor.fetchall()
 		templates = {
@@ -177,12 +181,12 @@ class Toggle(webapp2.RequestHandler):
 		value=int(value)	
 
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		cursor = conn.cursor()
-		sql1="SELECT status FROM regiscourse WHERE course_id= '%d'"%value
-		cursor.execute(sql1);
-		result=cursor.fetchall()
+    		cursor = conn.cursor()
+    		sql1="SELECT status FROM regiscourse WHERE course_id= '%d'"%value
+    		cursor.execute(sql1);
+    		result=cursor.fetchall()
 
-		for row in result:
+    		for row in result:
 			if row[0]==1:
 				sql2="UPDATE regiscourse set status=0 where course_id='%d'"%value
 
@@ -200,17 +204,17 @@ class Toggle(webapp2.RequestHandler):
 
 
 class search(webapp2.RequestHandler):
-	def post(self):
+  	def post(self):
 
 		Core.login(self)
 
-		course_code=self.request.get('keyword');
-		year=self.request.get('year');
+  		course_code=self.request.get('keyword');
+  		year=self.request.get('year');
   		
-		semester=self.request.get('semester');
-		check_code=0
-		check_fac=0
-		check_dep=0
+  		semester=self.request.get('semester');
+  		check_code=0
+  		check_fac=0
+  		check_dep=0
   		check_year=0
   		check_sem=0
   		allcheck=0
@@ -439,9 +443,31 @@ class InsertHandler(webapp2.RequestHandler):
 				'name' : data_code
 			}
 			
+			CONSUMER_KEY='635092385463.apps.googleusercontent.com'
+			CONSUMER_SECRET='Ut-esrt4aLIsKaMvPKsbvlzV'
+			SCOPES='https://sites.google.com/feeds/'
+			requestor_id = 'jakkrit_junrat@kkumail.com'
+			client = gdata.sites.client.SitesClient(source='jakkrit-sitesample-001')
+			#client.auth_token = gdata.gauth.TwoLeggedOAuthHmacToken(
+			#	CONSUMER_KEY, CONSUMER_SECRET, requestor_id)
+			client.domain = 'kkumail.com'
 			
+			oauth_callback_url = 'http://%s/get_access_token' % self.request.host
+			request_token = client.GetOAuthToken(
+				SCOPES, oauth_callback_url, CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+			gdata.gauth.AeSave(request_token, 'myKey')
 			
-			#result = service.groups().insert(body=params).execute(http=http)
+			self.redirect(request_token.generate_authorization_url(google_apps_domain=client.domain))
+			saved_request_token = gdata.gauth.AeLoad('myKey')
+			request_token = gdata.gauth.AuthorizeRequestToken(saved_request_token, self.request.uri)
+			access_token = client.GetAccessToken(request_token)
+			#client.auth_token = gdata.gauth.OAuthHmacToken(CONSUMER_KEY, CONSUMER_SECRET, TOKEN,
+            #                                   TOKEN_SECRET, gdata.gauth.ACCESS_TOKEN)
+			client.auth_token = access_token
+                                               
+			entry = client.CreateSite(data_course_name, description='Testing of Prinya course site', theme='slate')
+			
+			result = service.groups().insert(body=params).execute(http=http)
 
                         conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                         cursor2 = conn2.cursor()
@@ -451,13 +477,8 @@ class InsertHandler(webapp2.RequestHandler):
 
                         conn3 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
                         cursor3 = conn3.cursor()
-                        """
                         cursor3.execute("insert into log\
-								(staff_id,course_code,day,time,type, university_id) values((select staff_id from staff where type=2 AND email='%s' AND university_id='%s'),'%s',CURDATE(),'%s',1, '%d')"%(session['email'], session['university_id'],data_code,time_insert, session['university_id']))        
-                        conn3.commit()
-                        """
-                        cursor3.execute("insert into log\
-								(staff_id,course_code,day,time,type, university_id) values(1019,'%s',CURDATE(),'%s',1, '%s')"%(data_code,time_insert, session['university_id']))        
+                                (staff_id,course_code,day,time,type, university_id) values((select staff_id from staff where type=2 AND email='%s' AND university_id='%s'),'%s',CURDATE(),'%s',1, '%d')"%(session['email'], session['university_id'],data_code,time_insert, session['university_id']))        
                         conn3.commit()
 
                         if data_prerequisite!=0:
@@ -472,69 +493,8 @@ class InsertHandler(webapp2.RequestHandler):
                         conn2.close()
                         conn3.close()
                         conn4.close()
-                        self.redirect("/CreateSites?course_id="+data_code+"&course_name="+data_course_name)
-                        #self.redirect("/ModifyCourse?course_id="+data_code)
+                        self.redirect("/ModifyCourse?course_id="+data_code)
 
-class CreateSitesHandler(webapp2.RequestHandler):
-	@decorator.oauth_required
-	def get(self):
-		
-		Core.login(self)
-		session = get_current_session()
-		
-		data_code = self.request.get('course_id')
-		data_course_name = self.request.get('course_name')
-		
-		templates = {
-				'email' : session['email'],
-				'course_name' : data_course_name,
-				'course_id' : data_code,
-				}
-		get_template = JINJA_ENVIRONMENT.get_template('site_create.html')
-		self.response.write(get_template.render(templates));
-		
-		
-		
-class InsertSitesHandler(webapp2.RequestHandler):
-	@decorator.oauth_required
-	def post(self):
-		
-		Core.login(self)
-		session = get_current_session()
-		
-		site_username = self.request.get('site_username')
-		site_password = self.request.get('site_password')
-		data_course_name = self.request.get('course_name')
-		data_code = self.request.get('course_id')
-		
-		client = gdata.sites.client.SitesClient(source='jakkrit-sitesample-001')
-		client.ClientLogin(site_username, site_password, client.source)
-		client.domain = 'kkumail.com'
-		
-		site_name = data_course_name + "-1-2556"
-										   
-		entry = client.CreateSite(site_name, description='Testing of Prinya course site', theme='slate')
-		site_url = entry.GetAlternateLink().href
-		
-		site_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		site_cursor = site_conn.cursor()
-		site_cursor.execute("UPDATE course SET site_url = '%s' WHERE course_id = '%s'"%(site_url, data_code))
-		site_conn.commit()
-		"""
-		student_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		student_cursor = student_conn.cursor()
-		student_cursor.execute("SELECT student_id FROM registeredcourse WHERE regiscourse_id = '%s'"%(data_code))
-		student_fetch = student_cursor.fetchall()
-		
-		scope = gdata.acl.data.AclScope(value='email', type='user')
-		role = gdata.acl.data.AclRole(value='reader')
-		acl = gdata.sites.data.AclEntry(scope=scope, role=role)
-		"""
-		
-		site_conn.close()
-		#student_conn.close()
-		self.redirect("/ModifyCourse?course_id="+data_code+"&course_name="+data_course_name)
-		
 
 class ErrorHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
@@ -655,7 +615,6 @@ class ModifyCourseHandler(webapp2.RequestHandler):
 		session = get_current_session()
 
         	course_id = self.request.get('course_id');
-        	course_name = self.request.get('course_name')
 
         	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
         	cursor = conn.cursor()
@@ -813,7 +772,6 @@ class AddSectionHandler(webapp2.RequestHandler):
 		session = get_current_session()
         
     		course_id=self.request.get('course_id');
-    		course_name = self.request.get('course_name')
             	conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
             	cursor = conn.cursor()
                 sql="SELECT firstname FROM staff WHERE type=2 AND university_id=" + str(session['university_id'])
@@ -821,7 +779,6 @@ class AddSectionHandler(webapp2.RequestHandler):
                 templates = {
 			'email' : session['email'],
                     	'course_id' : course_id,
-                    	'course_name' : course_name,
                     	'name' : cursor.fetchall()
                 }
                 get_template = JINJA_ENVIRONMENT.get_template('section.html')
@@ -833,107 +790,42 @@ class InsSectionHandler(webapp2.RequestHandler):
     	@decorator.oauth_required
     	def post(self):
 
-			Core.login(self)
+		Core.login(self)
 
-			session = get_current_session()
+		session = get_current_session()
 
-			course_id=self.request.get('course_id');
-			course_name=self.request.get('course_name');
-			section_number=self.request.get('section_number');
-			section_number=int(section_number)
-			section_number_str = str(section_number)
-			teacher=self.request.get('teacher');
-			capacity=self.request.get('capacity');
-			capacity=int(capacity)
+        	course_id=self.request.get('course_id');
+                section_number=self.request.get('section_number');
+                section_number=int(section_number)
+                teacher=self.request.get('teacher');
+                capacity=self.request.get('capacity');
+                capacity=int(capacity)
 
-			conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-			cursor = conn.cursor()
-			sql="INSERT INTO section (regiscourse_id,section_number,teacher_id,capacity,enroll) \
+                conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+                cursor = conn.cursor()
+                sql="INSERT INTO section (regiscourse_id,section_number,teacher_id,capacity,enroll) \
                     	VALUES ((SELECT regiscourse_id FROM regiscourse WHERE course_id=(SELECT course_id FROM course where course_code = '%s')),'%d',\
-                    	(SELECT staff_id FROM staff WHERE firstname='%s' AND university_id='%s'),'%d','0')"%(course_id,section_number,teacher,session['university_id'],capacity)
-			cursor.execute(sql);
-			conn.commit();
-			conn.close();
+                    	(SELECT staff_id FROM staff WHERE type=2 AND firstname='%s' AND university_id='%s'),'%d','0')"%(course_id,section_number,teacher,session['university_id'],capacity)
+                cursor.execute(sql);
+                conn.commit();
+                conn.close();
 
-			utc = pytz.utc
-			date_object = datetime.today()
-			utc_dt = utc.localize(date_object);
-			bkk_tz = timezone("Asia/Bangkok");
-			bkk_dt = bkk_tz.normalize(utc_dt.astimezone(bkk_tz))
-			time_insert = bkk_dt.strftime("%H:%M:%S")
+                utc = pytz.utc
+                date_object = datetime.today()
+                utc_dt = utc.localize(date_object);
+                bkk_tz = timezone("Asia/Bangkok");
+                bkk_dt = bkk_tz.normalize(utc_dt.astimezone(bkk_tz))
+                time_insert = bkk_dt.strftime("%H:%M:%S")
 
-			conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-			cursor2 = conn2.cursor()
-			sql2="INSERT INTO log (staff_id,course_code,day,time,type, university_id)\
-                    	VALUES((select staff_id from staff where email='%s' AND university_id='%s'),'%s',CURDATE(),'%s',2, '%d')"%(session['email'], session['university_id'],course_id,time_insert, session['university_id'])
-			cursor2.execute(sql2)        
-			conn2.commit()
-			conn2.close();
-				
-			self.redirect("/CreateSecSites?course_id="+course_id+"&section_number="+section_number_str+"&course_name="+course_name+"&teacher="+teacher)
-			#self.redirect("/ModifyCourse?course_id="+course_id)
-               
-class CreateSecSitesHandler(webapp2.RequestHandler):
-	@decorator.oauth_required
-	def get(self):
-		
-		Core.login(self)
-		session = get_current_session()
-		
-		data_code = self.request.get('course_id')
-		section_number = self.request.get('section_number')
-		course_name = self.request.get('course_name')
-		teacher = self.request.get('teacher')
-		
-		templates = {
-				'email' : session['email'],
-				'course_id' : data_code,
-				'course_name' : course_name,
-				'section_number' : section_number,
-				'teacher' : teacher,
-				}
-		get_template = JINJA_ENVIRONMENT.get_template('sec_site_create.html')
-		self.response.write(get_template.render(templates));
-		
-class InsertSecSitesHandler(webapp2.RequestHandler):
-	@decorator.oauth_required
-	def post(self):
-		
-		Core.login(self)
-		session = get_current_session()
-		
-		site_sec_username = self.request.get('site_sec_username')
-		site_sec_password = self.request.get('site_sec_password')
-		data_code = self.request.get('course_id')
-		section_number = self.request.get('section_number')
-		course_name = self.request.get('course_name')
-		teacher_name = self.request.get('teacher_name')
-		
-		teach_conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
-		teach_cursor = teach_conn.cursor()
-		teach_cursor.execute("SELECT email FROM staff WHERE firstname = '%s'"%(teacher_name))
-		teach_fetch = teach_cursor.fetchall()
-		
-		teacher_email = teach_fetch[0]
-		
-		site_name = course_name+"-1-2556"
-		
-		client = gdata.sites.client.SitesClient(source='jakkrit-sitesample-001', site = site_name)
-		client.ClientLogin(site_sec_username, site_sec_password, client.source)
-		client.domain = 'kkumail.com'
-		
-		site_sec_name = course_name + "-sec" + section_number + "-1-2556"
-										   
-		entry = client.CreateSite(site_sec_name, description='Testing of Prinya course site', theme='slate')
-		site_sec_url = entry.GetAlternateLink().href
-		
-		scope = gdata.acl.data.AclScope(value=teacher_email, type='user')
-		role = gdata.acl.data.AclRole(value='writer')
-		acl = gdata.sites.data.AclEntry(scope=scope, role=role)
-		
-		acl_entry = client.Post(acl, client.MakeAclFeedUri())
-		
-		self.redirect("/ModifyCourse?course_id="+data_code+"&course_name="+course_name)
+                conn2 = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
+                cursor2 = conn2.cursor()
+                sql2="INSERT INTO log (staff_id,course_code,day,time,type, university_id)\
+                    	VALUES((select staff_id from staff where type=2 AND email='%s' AND university_id='%s'),'%s',CURDATE(),'%s',2, '%d')"%(session['email'], session['university_id'],course_id,time_insert, session['university_id'])
+                cursor2.execute(sql2)        
+                conn2.commit()
+                conn2.close();
+
+                self.redirect("/ModifyCourse?course_id="+course_id)
 
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1668,10 +1560,6 @@ app = webapp2.WSGIApplication([
 	('/UserDelete', UserDelete),
 	('/Credit', Credit),
 	('/CreditHandler', CreditHandler),
-	('/CreateSites', CreateSitesHandler),
-	('/InsertSites', InsertSitesHandler),
-	('/CreateSecSites', CreateSecSitesHandler),
-	('/InsertSecSites', InsertSecSitesHandler),
 	('/Logout', Logout),
 	(decorator.callback_path, decorator.callback_handler())    
 ], debug=True)
