@@ -1408,6 +1408,8 @@ class CreditHandler(webapp2.RequestHandler):
 class ManageFaculty(webapp2.RequestHandler):
 	@decorator.oauth_required
 	def post(self):
+
+		Core.login(self)
 		session = get_current_session()
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
 		cursor = conn.cursor()
@@ -1442,6 +1444,8 @@ class ManageFaculty(webapp2.RequestHandler):
 			self.response.write("Update Successfully<br><a href='/ManageFaculty'>back</a>")
 	@decorator.oauth_required
 	def get(self):
+
+		Core.login(self)
 		session = get_current_session()
 
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')

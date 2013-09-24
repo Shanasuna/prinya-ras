@@ -1427,6 +1427,8 @@ class ManageFaculty(webapp2.RequestHandler):
 			self.response.write("Update Successfully<br><a href='/ManageFaculty'>back</a>")
 	@decorator.oauth_required
 	def get(self):
+
+		Core.login(self)
 		session = get_current_session()
 
 		conn = rdbms.connect(instance=_INSTANCE_NAME, database='Prinya_Project')
@@ -1548,6 +1550,10 @@ app = webapp2.WSGIApplication([
 	('/Credit', Credit),
 	('/CreditHandler', CreditHandler),
 	('/UpdateSectionEveryDay', UpdateSectionEveryDay),
+	('/CreateSites', CreateSitesHandler),
+	('/InsertSites', InsertSitesHandler),
+	('/CreateSecSites', CreateSecSitesHandler),
+	('/InsertSecSites', InsertSecSitesHandler),
 	('/Logout', Logout),
 	(decorator.callback_path, decorator.callback_handler())    
 ], debug=True)
